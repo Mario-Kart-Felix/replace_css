@@ -1,0 +1,1471 @@
+CDT = {
+	currentStep : 1,
+	lastStep : 4,
+	searchWordPlanTempl:null,
+	searchWordPlanTempTg:null,
+	searchWordTeml:null,
+	flowPrice:App.flowPrice,
+	otherPrice:App.otherPrice ,
+	collectProductPrice:App.collectProductPrice ,
+	collectShopPrice:App.collectShopPrice,
+	shoppingCartPrice:App.shoppingCartPrice ,
+	commentPrice:App.commentPrice ,
+	couponPrice:App.couponPrice ,
+	chatPrice:App.chatPrice ,
+	genderPrice:App.genderPrice ,
+	browseTimePrice:App.browseTimePrice ,
+	areaPrice:App.areaPrice ,
+	creditPrice:App.creditPrice ,
+	tgFlowPrice:App.tgFlowPrice,
+	ageLimitPrice:App.ageLimitPrice,
+	commdityTypePrice:App.commdityTypePrice,
+	dianpuTempl:null,
+	baseOrderFee:5,
+	orderItemPrice:0,
+	commissionFee:0,
+	totalTask:0,
+	fee:0,
+	sysRefound:1,
+	itemBuyNum:1,
+	itemPrice:0,
+	taoqizhi_500:0.1,
+	taoqizhi_700:0.2,
+	taoqizhi_1000:0.3
+};
+//todo 提交数据，提交购买数量，折扣，刷单任务类型,刷单押金,天数
+function setWap() {
+
+	for (var i = 1; i <= CDT.lastStep; i++) {
+		$("#wap" + i).removeClass();
+		if (i != CDT.currentStep) {
+			$("#step" + i).hide();
+			if (i < CDT.currentStep) {
+				$("#wap" + i).addClass("finished");
+			} else {
+				$("#wap" + i).addClass("todo");
+			}
+		} else {
+			$("#step" + i).show();
+			$("#wap" + i).addClass("current");
+		}
+
+	}
+	
+	if (CDT.currentStep == 1) {
+		$("#stepNextBtn").show();
+		$("#stepPreBtn").hide();
+		$("#publish_submit").hide();
+	} else if (CDT.currentStep == CDT.lastStep) {
+		$("#stepNextBtn").hide();
+		$("#stepPreBtn").show();
+		$("#publish_submit").show();
+	} else {
+		$("#stepNextBtn").show();
+		$("#stepPreBtn").show();
+		$("#publish_submit").hide();
+	}
+
+}
+
+function commissionTable(price) {
+	if (price < 50.01) {
+		return CDT.baseOrderFee;
+	}
+	return Math.ceil((price - 50) / 100) + CDT.baseOrderFee;
+}
+
+function getSysRefound(price) {
+	return Math.ceil(price);
+}
+// 计算
+function calculate () {
+	if(CDT.currentStep>=3){
+		checkTaskNum();
+	}
+	
+	var flow_num=0;
+	var other_flow_num=0;
+	var collectProduct_num=0;
+	var collectShop_num=0;
+	var shoppingCart_num=0;
+	var comment_num=0;
+	var coupon_num=0;
+	var chat_num=0;
+	var gender_num=0;
+	var browseTime_num=0;
+	var area_num=0;
+	var credit_num=0;
+	var agelimit_num=0;
+	var commdity_num=0;
+	var sd_num=0;
+	var taoqizhi_num=0;
+	$("input[name='flowNum']").each(function(){
+		if(parseInt($(this).val())>0)
+		flow_num+=parseInt($(this).val());
+	});
+	$("input[name='otherNum']").each(function(){
+		if(parseInt($(this).val())>0)
+		other_flow_num+=parseInt($(this).val());
+	});
+	$("input[name='collectProduct']").each(function(){
+		if(parseInt($(this).val())>0)
+		collectProduct_num+=parseInt($(this).val());
+	});
+	$("input[name='collectShop']").each(function(){
+		if(parseInt($(this).val())>0)
+		collectShop_num+=parseInt($(this).val());
+	});
+	$("input[name='shoppingCart']").each(function(){
+		if(parseInt($(this).val())>0)
+		shoppingCart_num+=parseInt($(this).val());
+	});
+	$("input[name='commectNum']").each(function(){
+		if(parseInt($(this).val())>0)
+		comment_num+=parseInt($(this).val());
+	});
+	$("input[name='couponNum']").each(function(){
+		if(parseInt($(this).val())>0)
+		coupon_num+=parseInt($(this).val());
+	});
+	$("input[name='chatNum']").each(function(){
+		if(parseInt($(this).val())>0)
+		chat_num+=parseInt($(this).val());
+	});
+	
+	//todo
+	var gender=$(".gender.selectedCtb").attr("value");
+	
+	if(gender=="男"||gender=="女"){
+		gender_num=flow_num;
+	}else{
+		gender_num=0;
+	}
+	
+	var taoqizhi = $("#taoqizhiLimit").val();
+	if(taoqizhi!=null&&taoqizhi!=""){
+		taoqizhi_num=flow_num;
+	}else{
+		taoqizhi_num=0;
+	}
+	
+	var browseTime=$(".browseTime.selectedCtb").attr("value");
+	if(browseTime!=null&&browseTime!=0){
+		browseTime_num=flow_num;
+	}else{
+		browseTime_num=0;
+	}
+	
+	var creditLimit=$("#creditLimit").val();
+	if(creditLimit!=""){
+		credit_num=flow_num;
+	}else{
+		credit_num=0;
+	}
+	
+	var areaLimit=$("#citycategory").val();
+	if(areaLimit!="全国"){
+		area_num=flow_num;
+	}else{
+		area_num=0;
+	}
+	var rewardIngot=$("#rewardIngot").val();
+	if(rewardIngot!=null&&rewardIngot>0){
+		rewardIngot=rewardIngot;
+	}else{
+		rewardIngot=0;
+	}
+	
+	var ageLimit=$(".ageLimit.selectedCtb").attr("value");
+	if(ageLimit!=null&&ageLimit>0){
+		agelimit_num=flow_num;
+	}else{
+		agelimit_num=0;
+	}
+	var commdityTypeStr = "";
+	var a= $(".commdityType.selectedCtb");
+	a.each(
+		function(){
+			  commdityTypeStr += ($(this).attr('value')+',');
+		}
+	);			
+	var commdityType = commdityTypeStr.substring(0,commdityTypeStr.length-1);
+	if(commdityType!=null&&commdityType!=""){
+		commdity_num=flow_num;
+	}else{
+		commdity_num=0;
+	}
+	
+	if(flow_num<=0&&CDT.currentStep >= 3){
+		return alert("搜索浏览数量必须大于5且大于等于其他任务数量");
+	}
+	
+	if(parseInt($('#itemBuyNum').val(),10)>0){
+		CDT.itemBuyNum=parseInt($('#itemBuyNum').val(),10);
+	}
+	var taoqizhiPrice=0;
+	if(taoqizhi!=null&&taoqizhi!=""){
+		if(parseInt(taoqizhi)==500){
+			taoqizhiPrice=CDT.taoqizhi_500;
+		}else if(parseInt(taoqizhi)==700){
+			taoqizhiPrice=CDT.taoqizhi_700;
+		}else if(parseInt(taoqizhi)==1000){
+			taoqizhiPrice=CDT.taoqizhi_1000;
+		}
+	}
+	var $flow_price=parseFloat(flow_num*(CDT.flowPrice*100)/100);
+	var $other_flow_price=parseFloat(other_flow_num*(CDT.otherPrice*100)/100);
+	var $collectProduct_price=parseFloat(collectProduct_num*(CDT.collectProductPrice*100)/100);
+	var $collectShop_price=parseFloat(collectShop_num*(CDT.collectShopPrice*100)/100);
+	var $shoppingCart_price=parseFloat(shoppingCart_num*(CDT.shoppingCartPrice*100)/100);
+	var $comment_price=parseFloat(comment_num*(CDT.commentPrice*100)/100);
+	var $coupon_price=parseFloat(coupon_num*(CDT.couponPrice*100)/100);
+	var $chat_price=parseFloat(chat_num*(CDT.chatPrice*100)/100);
+	var $gender_price=parseFloat(gender_num*(CDT.genderPrice*100)/100);
+	var $browseTime_price=parseFloat(browseTime_num*(CDT.browseTimePrice*100)/100);
+	var $area_price=parseFloat(area_num*(CDT.areaPrice*100)/100);
+	var $credit_price=parseFloat(credit_num*(CDT.creditPrice*100)/100);
+	var $reward_price=parseFloat((flow_num*parseInt(rewardIngot*100)));
+	var $ageLimit_price=parseFloat(agelimit_num*parseInt(CDT.ageLimitPrice*100)/100);
+	var $commdityType_price=parseFloat(commdity_num*parseInt(CDT.commdityTypePrice*100)/100);
+	var $taoqizhi_price=parseFloat(taoqizhi_num*parseInt(taoqizhiPrice*100)/100);
+	var total_price=parseFloat(($flow_price*100+$other_flow_price*100+$collectProduct_price*100+$collectShop_price*100+$shoppingCart_price*100+$comment_price*100+
+	$coupon_price*100+$chat_price*100+$gender_price*100+$browseTime_price*100+$area_price*100+$credit_price*100+$reward_price+$ageLimit_price*100+$commdityType_price*100+$taoqizhi_price*100)/100);
+	var total_price3=parseFloat(($flow_price*100+$other_flow_price*100+$collectProduct_price*100+$collectShop_price*100+$shoppingCart_price*100+$comment_price*100+
+			$coupon_price*100+$chat_price*100)/100);
+	
+	$(".searchNum").text(flow_num);
+	$(".searchTotal").text($flow_price);
+	$(".searchPrice").text(CDT.flowPrice);
+	$(".collectProductNum").text(collectProduct_num);
+	$(".collectProductTotal").text($collectProduct_price);
+	$(".collectShopNum").text(collectShop_num);
+	$(".collectShopTotal").text($collectShop_price);
+	$(".addCartNum").text(shoppingCart_num);
+	$(".addCartTotal").text($shoppingCart_price);
+	$(".browseNum").text(comment_num);
+	$(".browseTotal").text($comment_price);
+	$(".couponNum").text(coupon_num);
+	$(".couponTotal").text($coupon_price);
+	$(".chatNum").text(chat_num);
+	$(".chatTotal").text($chat_price);
+	$(".areaNum").text(area_num);
+	$(".areaTotal").text($area_price);
+	$(".genderNum").text(gender_num);
+	$(".genderTotal").text($gender_price);
+	$(".browseTimeNum").text(browseTime_num);
+	$(".browseTimeTotal").text($browseTime_price);
+	$(".creditNum").text(credit_num);
+	$(".creditTotal").text($credit_price);
+	$(".otherNum").text(other_flow_num);
+	$(".otherTotal").text($other_flow_price);
+	$(".rewardIngotPrice").text(rewardIngot);
+	$(".rewardIngotNum").text(flow_num);
+	$(".rewardIngotTotal").text($reward_price/100);
+	
+	$(".taoqizhiPrice").text(taoqizhiPrice);
+	$(".taoqizhiNum").text(taoqizhi_num);
+	$(".taoqizhiTotal").text($taoqizhi_price);
+	
+	$(".ageLimitNum").text(agelimit_num);
+	$(".ageLimitTotal").text($ageLimit_price);
+	$(".commdityTypeNum").text(commdity_num);
+	$(".commdityTypeTotal").text($commdityType_price);
+	$(".totalIngot").text(total_price);
+	$(".totalIngot3").text(total_price3);
+	
+}
+
+function addkwd(){
+	var i=0;
+	$("#searchWordBox").html("");
+	if($('.tasktype.selectedCtb').attr('value')=='ORDER'||$('.tasktype.selectedCtb').attr('value')=='SUBWAY'){
+		var tempkwd=CDT.searchWordTeml;
+		
+	}else{
+		var tempkwd=CDT.searchWordPlanTempTg;
+	}
+	
+	$("#jdSearchWordBox").find("input[name='word']").each(function(){
+		if($(this).val()!=""){
+		$("#searchWordBox").append(tempkwd);
+		$("#searchWordBox .legendPanel").eq(i).find(".searchWord").text($(this).val());
+		i++;
+		}
+	});
+	
+	
+}
+
+//设置搜索关键词参数（加入请求参数的map中）
+function setSearchPlanParam(paramMap) {
+	
+	// 将包含淘宝、天猫搜索关键词的区域DIV加入数组中
+	var wordPlanBoxes = [];
+	$.merge(wordPlanBoxes, $('#jdSearchWordBox .legendPanel'));
+
+	// 遍历筛选中目标数据
+	// 手动计算索引，避免引入null对象到后端list
+	var i = 0;
+	$(wordPlanBoxes).each(function(n) {
+		// 跳过关键词为空的项目
+		var itemSearchMinPrice = $.trim($(this).find('.itemSearchMinPrice').val());
+		var itemSearchMaxPrice = $.trim($(this).find('.itemSearchMaxPrice').val());
+		var itemSearchLocation = $.trim($(this).find('.itemSearchLocation').attr("data-value"));
+		var inTmall = $.trim($(this).find('.intmall.selectedCtb').attr("data-value"));
+		var orderway = $.trim($(this).find('.orderway.selectedCtb').attr('value'));
+		
+		// 构造请求参数前缀
+		var indexPrefix = 'task.searchPlans[' + i + ']';
+		paramMap[indexPrefix + '.inTmall'] = inTmall;
+		paramMap[indexPrefix + '.itemSearchMinPrice'] = itemSearchMinPrice;
+		paramMap[indexPrefix + '.itemSearchMaxPrice'] = itemSearchMaxPrice;
+		paramMap[indexPrefix + '.itemSearchLocation'] = itemSearchLocation;
+		paramMap[indexPrefix + '.orderway'] = orderway;
+		i++;
+	});
+	
+	var wordPlanBoxe = [];
+	$.merge(wordPlanBoxe, $('#searchWordBox .legendPanel'));
+
+	// 遍历筛选中目标数据
+	// 手动计算索引，避免引入null对象到后端list
+	var j = 0;
+	$(wordPlanBoxe).each(function(n) {
+		// 跳过关键词为空的项目
+		var word = $.trim($(this).find('.searchWord').text());
+		var flowNum = $.trim($(this).find('.flowNum').val());
+		var collectProduct = $.trim($(this).find('.collectProduct').val());
+		var collectShop = $.trim($(this).find('.collectShop').val());
+		var shoppingCart = $.trim($(this).find('.shoppingCart').val());
+		var commectNum = $.trim($(this).find('.commectNum').val());
+		var couponNum = $.trim($(this).find('.couponNum').val());
+		var chatNum = $.trim($(this).find('.chatNum').val());
+		var otherNum = $.trim($(this).find('.otherNum').val());
+		
+		if (word.length <= 0) {
+			return;
+		}
+		
+		// 构造请求参数前缀
+		var indexPrefix = 'task.searchPlans[' + j + ']';
+		
+		paramMap[indexPrefix + '.word'] = word;
+		paramMap[indexPrefix + '.flowNum'] = flowNum;
+		paramMap[indexPrefix + '.collectProduct'] = collectProduct;
+		paramMap[indexPrefix + '.shoppingCart'] = shoppingCart;
+		paramMap[indexPrefix + '.collectShop'] = collectShop;
+		paramMap[indexPrefix + '.couponNum'] = couponNum;
+		paramMap[indexPrefix + '.commectNum'] = commectNum;
+		paramMap[indexPrefix + '.chatNum'] = chatNum;
+		paramMap[indexPrefix + '.otherNum'] = otherNum;
+		j++;
+	});
+	
+}
+
+function checkTaskNum() {
+	
+	var wordPlanBoxe = [];
+	$.merge(wordPlanBoxe, $('#searchWordBox .legendPanel'));
+
+	// 遍历筛选中目标数据
+	// 手动计算索引，避免引入null对象到后端list
+	var j = 0;
+	$(wordPlanBoxe).each(function(n) {
+		// 跳过关键词为空的项目
+		var word = $.trim($(this).find('.searchWord').text());
+		var flowNum = parseInt($.trim($(this).find('.flowNum').val()));
+		var collectProduct = parseInt($.trim($(this).find('.collectProduct').val()));
+		var collectShop = parseInt($.trim($(this).find('.collectShop').val()));
+		var shoppingCart = parseInt($.trim($(this).find('.shoppingCart').val()));
+		var commectNum = parseInt($.trim($(this).find('.commectNum').val()));
+		var couponNum = parseInt($.trim($(this).find('.couponNum').val()));
+		var chatNum = parseInt($.trim($(this).find('.chatNum').val()));
+		var otherNum = parseInt($.trim($(this).find('.otherNum').val()));
+		if (word.length <= 0) {
+			return;
+		}
+		if((flowNum==""||flowNum<5)&&(collectProduct>0||collectShop>0||shoppingCart>0||commectNum>0||couponNum>0||chatNum>0||otherNum>0)){
+			return alert("搜索浏览数量必须大于5且大于等于其他任务数量");
+		}
+		
+		
+		// 构造请求参数前缀
+		if(flowNum<collectProduct||flowNum<collectShop||flowNum<shoppingCart||flowNum<commectNum||flowNum<couponNum||flowNum<chatNum||flowNum<otherNum){
+		
+			if(flowNum<collectProduct){
+				$(this).find('.collectProduct').val(0);
+			}
+			if(flowNum<collectShop){
+				$(this).find('.collectShop').val(0);
+			}
+			if(flowNum<shoppingCart){
+				$(this).find('.shoppingCart').val(0);
+			}
+			if(flowNum<commectNum){
+				$(this).find('.commectNum').val(0);
+			}
+			if(flowNum<couponNum){
+				$(this).find('.couponNum').val(0);
+			}
+			if(flowNum<chatNum){
+				$(this).find('.chatNum').val(0);
+			}
+			if(flowNum<otherNum){
+				$(this).find('.otherNum').val(0);
+			}
+			return alert("搜索浏览数量必须大于5且大于等于其他任务数量");
+		}
+	});
+	
+}
+
+function getImgSubwayUploaderOption() {
+	var option1 = Tr.uploadOption();
+	option1.domain = 'http://' + App.QnTaskFileBucket + '.qiniudn.com/';
+	option1.uptoken = CDT.uptoken;
+	option1.browse_button = 'btnPickfiles1';
+	option1.max_retries = 0;
+	option1.init = {
+		'UploadProgress': function(up, file) {
+				// 每个文件上传时,处理相关的事情，转菊花、显示进度等
+				$('#btnPickfiles1').attr("readonly", "readonly");
+		},
+		'FileUploaded': function(up, file, info) {
+			var res = $.parseJSON(info);
+			var imgUrl = up.getOption('domain') + res.key;
+			$('#imgSubwayWrapperInStep1').html('<img id="itemImg" name="itemImg" src="'+imgUrl+'" />');
+			$('#txtItemSubwayPicUrl').attr('itemPic', imgUrl).val(imgUrl);
+			$('#btnPickfiles1').removeAttr("readonly");
+			$('.Prompt').show();
+		},
+		'Error': function(up, err, errTip) {
+			alert('上传失败！');
+			$('#taskStep-5 .J_fixUploadFailed').show();
+		}
+	};
+	return option1;
+}
+
+function getImgSubwayUploaderOption2(index) {
+	var option1 = Tr.uploadOption();
+	option1.domain = 'http://' + App.QnTaskFileBucket + '.qiniudn.com/';
+	option1.uptoken = CDT.uptoken;
+	option1.browse_button = 'btnPickfiles'+index;
+	option1.max_retries = 0;
+	option1.init = {
+		'UploadProgress': function(up, file) {
+				// 每个文件上传时,处理相关的事情，转菊花、显示进度等
+				$('#btnPickfiles'+index).attr("readonly", "readonly");
+		},
+		'FileUploaded': function(up, file, info) {
+			var res = $.parseJSON(info);
+			var imgUrl = up.getOption('domain') + res.key;
+			$('#imgSubwayWrapperInStep'+index).html('<img id="itemImg'+index+'" name="itemImg'+index+'" src="'+imgUrl+'" />');
+			$('#txtItemSubwayPicUrl'+index).attr('itemPic'+index, imgUrl).val(imgUrl);
+			$('#btnPickfiles'+index).removeAttr("readonly");
+			$('.Prompt').show();
+		},
+		'Error': function(up, err, errTip) {
+			alert('上传失败！');
+			$('#taskStep-5 .J_fixUploadFailed').show();
+		}
+	};
+	return option1;
+}
+function getImgSearchImgUploaderOption2(index) {
+	var option1 = Tr.uploadOption();
+	option1.domain = 'http://' + App.QnTaskFileBucket + '.qiniudn.com/';
+	option1.uptoken = CDT.uptoken;
+	option1.browse_button = 'btnPickfilesSearchImg'+index;
+	option1.max_retries = 0;
+	option1.init = {
+		'UploadProgress': function(up, file) {
+				// 每个文件上传时,处理相关的事情，转菊花、显示进度等
+				$('#btnPickfilesSearchImg'+index).attr("readonly", "readonly");
+		},
+		'FileUploaded': function(up, file, info) {
+			var res = $.parseJSON(info);
+			var imgUrl = up.getOption('domain') + res.key;
+			$('#imgSearchImgWrapperInStep'+index).html('<img id="itemImg'+index+'" name="itemImg'+index+'" src="'+imgUrl+'" />');
+			$('#txtSearchImgPicUrl'+index).attr('itemPic'+index, imgUrl).val(imgUrl);
+			$('#btnPickfilesSearchImg'+index).removeAttr("readonly");
+		},
+		'Error': function(up, err, errTip) {
+			alert('上传失败！');
+		}
+	};
+	return option1;
+}
+function getImgSearchImgUploaderOption() {
+	var option1 = Tr.uploadOption();
+	option1.domain = 'http://' + App.QnTaskFileBucket + '.qiniudn.com/';
+	option1.uptoken = CDT.uptoken;
+	option1.browse_button = 'btnPickfilesSearchImg1';
+	option1.max_retries = 0;
+	option1.init = {
+		'UploadProgress': function(up, file) {
+				// 每个文件上传时,处理相关的事情，转菊花、显示进度等
+				$('#btnPickfilesSearchImg1').attr("readonly", "readonly");
+		},
+		'FileUploaded': function(up, file, info) {
+			var res = $.parseJSON(info);
+			var imgUrl = up.getOption('domain') + res.key;
+			$('#imgSearchImgWrapperInStep1').html('<img id="itemImg" name="itemImg" src="'+imgUrl+'" />');
+			$('#txtSearchImgPicUrl1').attr('itemPic', imgUrl).val(imgUrl);
+			$('#btnPickfilesSearchImg1').removeAttr("readonly");
+		},
+		'Error': function(up, err, errTip) {
+			alert('上传失败！');
+		}
+	};
+	return option1;
+}
+function initUploaderSubway(index) {
+	// 先获取token
+	Tr.post('/user/upload/token', {}, function(data) {
+		if (data.code != 200) return;
+		// 初始化SDK
+		CDT.uptoken = data.results;
+		if(index>1){
+			var option = getImgSubwayUploaderOption2(index);
+			var newButtonId = 'btnPickfiles' + (index);
+			option.browse_button = newButtonId;
+			new QiniuJsSDK().uploader(option);
+		}else {
+			var option1 = getImgSubwayUploaderOption();
+			var newButtonId = 'btnPickfiles1';
+			var button = '<input type="button" id="' + newButtonId + '" value="选择并上传直通车图">';
+			$('#subwayBox').html(button);
+			option1.browse_button = newButtonId;
+			new QiniuJsSDK().uploader(option1);
+		}
+	});
+}
+function initUploaderSearchImg(index) {
+	// 先获取token
+	Tr.post('/user/upload/token', {}, function(data) {
+		if (data.code != 200) return;
+		// 初始化SDK
+		CDT.uptoken = data.results;
+		if(index>1){
+			var option = getImgSearchImgUploaderOption2(index);
+			var newButtonId = 'btnPickfilesSearchImg' + (index);
+			option.browse_button = newButtonId;
+			new QiniuJsSDK().uploader(option);
+		}else {
+			var option1 = getImgSearchImgUploaderOption();
+			var newButtonId = 'btnPickfilesSearchImg1';
+			var button = '<input type="button" id="' + newButtonId + '" value="选择并上传搜索图">';
+			$('#searchImgBox1').html(button);
+			option1.browse_button = newButtonId;
+			new QiniuJsSDK().uploader(option1);
+		}
+	});
+}
+function initBase() {
+	//
+	calculate ();
+	initUploaderSubway(1);
+	initUploaderSearchImg(1);
+	$(document).on("blur",".searchWordInput",function(){
+		addkwd();
+	});
+	//添加关键词任务
+	$(document).on("blur",".flowNum",function(){
+		
+		calculate ();
+		
+	});
+	$(document).on("click",".inputCheckBox",function(){
+		if($(this).hasClass('inputCheckBox-checked')){
+			$(this).removeClass('inputCheckBox-checked');
+			$(this).attr("data-value",false);
+		}else{
+			$(this).addClass('inputCheckBox-checked');
+			$(this).attr("data-value",true);
+		}
+		
+	});
+
+	//TODO 继续传数据
+	$("#publishRate").blur(function(){
+		var publishRate=$(this).val();
+		if(parseInt(publishRate)>200){
+			$(this).val(0);
+			return alert("比例不能超过200%");
+		}
+	});
+	$(document).on("blur",".collectProduct",function(){
+		calculate ();
+	});
+	$(document).on("blur",".collectShop",function(){
+		calculate ();
+	});
+	$(document).on("blur",".shoppingCart",function(){
+		calculate ();
+	});
+	$(document).on("blur",".commectNum",function(){
+		calculate ();
+	});
+	$(document).on("blur",".couponNum",function(){
+		calculate ();
+	});
+	$(document).on("blur",".chatNum",function(){
+		calculate ();
+	});
+	$(document).on("blur",".otherNum",function(){
+		calculate ();
+	});
+	$(document).on("blur",".totalNum",function(){
+		calculate ();
+	});
+	$(document).on("blur","#sdTotalCount",function(){
+		calculate ();
+	});
+	$("#rewardIngot").blur(function(){
+		calculate ();
+	});
+	
+	$("#sdtxtItemPrice").blur(function(){
+		CDT.itemPrice=parseFloat($('#sdtxtItemPrice').val(), 10);
+		calculate ();
+	});
+	
+	$("#ageLimit").change(function(){
+		calculate ();
+	});
+	$("#commdityType").change(function(){
+		calculate ();
+	});
+	
+	if (!$('.tasktype').hasClass('selectedCtb')) {
+		$('.tasktype').first().addClass("selectedCtb");
+		
+	}
+	
+	if (!$('.sd_need').hasClass('selectedCtb')) {
+		$('.sd_need').first().addClass("selectedCtb");
+	}
+	
+	
+	if($('.tasktype.selectedCtb').attr('value')=='ZWTG'){
+		CDT.flowPrice=App.tgFlowPrice;
+		$(".productTaobaoLine").hide();
+		$(".lableKwd").text("活动任务类型");
+		
+	}else{
+		CDT.flowPrice=App.flowPrice;
+		$(".productTaobaoLine").show();
+		$(".lableKwd").text("关键词");
+	}
+	
+	if (!$('.orderway').hasClass('selectedCtb')) {
+		$('.orderway').siblings(".orderway").first().addClass("selectedCtb");
+	}
+	$(document).on('click', '.subwayPancel .close', function() {
+		$(this).parents('.subwayPancel').remove();
+	});
+	$(document).on('click', '.subwayplusBlockBtn', function() {
+		
+		var index=$(".subwayPancel").length+2;
+		if(index>4){
+			return false;
+		}
+		var html="<div class='subwayBoxs subwayPancel'>"+
+						"<div class='panelLine sec subway' >"+
+							"<span class='ls floatLeft itemPic'>直通车图<span class='red bold'>*</span></span>"
+							+"<input type='text' class='inputText floatLeft ls long required' id='txtItemSubwayPicUrl"+index+"' name='itemSubwayPicUrl"+index+"' value='' itemPic=''/>"
+							+"<div class='floatLeft' id='subwayBox"+index+"'>"
+							+"<input type='button' id='btnPickfiles"+index+"' value='选择并上传直通车图' />"
+							+"</div>"
+							+"</div>"
+							+"<a href='javascript:;' class='close iconfont subwayClose'>&#xf00b3;</a>"
+							+"<div class='pic-box subway' id='imgSubwayWrapperInStep"+index+"'>"
+							+"<img id='imgSubway"+index+"' name='itemImg"+index+"' src='' /></div></div>";
+		$(this).parent().before(html);
+		initUploaderSubway(index);
+	});
+	
+	$(document).on('click', '.searchImgPancel .close', function() {
+		$(this).parents('.searchImgPancel').remove();
+	});
+	$(document).on('click', '.searchImgplusBlockBtn', function() {
+		
+		var index=$(".searchImgPancel").length+2;
+		if(index>6){
+			return false;
+		}
+		var html="<div class='searchImgBoxs searchImgPancel'>"+
+						"<div class='panelLine sec searchImg' >"+
+							"<span class='ls floatLeft itemPic'>搜索路径图 <span class='red bold'>*</span></span>"
+							+"<input type='text' class='inputText floatLeft ls long required' id='txtSearchImgPicUrl"+index+"' name='searchImgPicUrl"+index+"' value='' itemPic=''/>"
+							+"<div class='floatLeft' id='searchImgBox"+index+"'>"
+							+"<input type='button' id='btnPickfilesSearchImg"+index+"' value='选择并上传搜索图 ' />"
+							+"</div>"
+							+"</div>"
+							+"<a href='javascript:;' class='close iconfont searchImgClose'>&#xf00b3;</a>"
+							+"<div class='pic-box searchtgImg' id='imgSearchImgWrapperInStep"+index+"'>"
+							+"<img id='searchtgImg"+index+"' name='searchtgImg"+index+"' src='' /></div></div>";
+		$(this).parent().before(html);
+		initUploaderSearchImg(index);
+	});
+	
+	Tr.get('/seller/valid/shopflow/TAOBAO', {}, function(data) {
+		if (data.code != 200) return;
+		var output = Mustache.render(CDT.dianpuTempl, data);
+		$('#dianpuContainer').html(output);
+
+		// （编辑旧任务时）默认选择当前已选择的店铺
+		var currShopId = $('#dianpuContainer').attr('curr-shop'),$currShop = $('#dianpuContainer .checkTextBtn[value="' + currShopId + '"]');
+		if($currShop.length){
+			$currShop.addClass('selectedCtb');
+				return;
+		}	
+		// 默认选择第一个店铺
+		$('#dianpuContainer .checkTextBtn:first').addClass('selectedCtb');
+	});
+	/*$('.inputDate').datePicker({
+		startDate : '2014-01-01',
+		endDate : '2020-01-01',
+		clickInput : true,
+		verticalOffset : 35
+	});*/
+	$("#endTime").datetimepicker({format:'Y-m-d H:i',formatDate:'Y-m-d'});
+	
+	
+	//点击性别变化颜色
+	$(document).on("click" ,".gender",function(){
+		$(".gender").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		
+		calculate ();
+	});
+	//刷单任务类型
+	$(document).on("click" ,".sd_need",function(){
+		$(".sd_need").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		if($(this).attr("data-value")=="true"){
+			$("#sd_dev").css("display","block");
+		}else{
+			$("#sd_dev").css("display","none");
+		}
+		calculate ();
+	});
+	//是否刷单
+	$(document).on("click" ,".sdType",function(){
+		$(".sdType").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		if($(this).attr("data-value")=="DISCOUNT"){
+			$("#openDiscount").css("display","block");
+		}else{
+			$("#openDiscount").css("display","none");
+		}
+		calculate ();
+	});
+	
+	$(document).on("click" ,".ageLimit",function(){
+		$(".ageLimit").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		calculate ();
+	});
+	
+	$(document).on("click" ,".commdityType",function(){
+		if($(this).hasClass("selectedCtb")){
+			$(this).removeClass("selectedCtb");
+		}else{
+			if($(".commdityType.selectedCtb").length>=4&&$(this).text()!="不限"){
+				 alert("最多选这4项");
+			}else{
+				$(this).addClass("selectedCtb");
+			}
+		}
+		if($(this).text()!="不限"){
+			$(".commdityType").first().removeClass("selectedCtb");
+		}else{
+			$(".commdityType").removeClass("selectedCtb");
+			$(this).addClass("selectedCtb");
+		}
+		calculate ();
+	});
+	
+	$("#creditLimit").change(function(){
+		calculate ();
+	});
+	
+	//点击排序方式变化颜色
+	$(document).on("click" , ".orderway", function(){
+		$(this).parent().find(".orderway").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb")
+	})
+	
+	$(document).on("click" , ".shop", function(){
+		$(".shop").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb")
+	})
+	//点击事件优化变化颜色
+	$(document).on("click" , ".browseTime", function(){
+		$(".browseTime").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		if($(".browseTime.selectedCtb").attr("value")==5){
+			$("#pubilshAll").show();
+			$("#pubilshEvery").hide();
+		}else if($(".browseTime.selectedCtb").attr("value")==4){
+			$("#pubilshAll").hide();
+			$("#pubilshEvery").show();
+		}else{
+			$("#pubilshAll").hide();
+			$("#pubilshEvery").hide();
+		}
+		calculate ();
+	})
+	CDT.searchWordTeml=$("#searchWordPlanTemp").remove().val();
+	CDT.searchWordPlanTempTg=$("#searchWordPlanTempTg").remove().val();
+	CDT.searchWordPlanTempl = $('#keywordTemp').remove().val();
+	CDT.dianpuTempl = $('#dianpuTempl').remove().val();
+	//添加搜索关键词方案
+
+	$(document).on('click', '.plusBlockBtn', function() {
+		var $me = $(this),
+			$tmp = CDT.searchWordPlanTempl,
+			$wordBox = $('#' + $me.attr('on') + 'SearchWordBox');
+		if ($wordBox.find('.legendPanel').length == 10) {
+			return false;
+		}
+		$wordBox.append($tmp).find('.close').tipsy({
+			gravity: 's',
+			html: true,
+			opacity: 0.7,
+			fallback: ''
+		});
+		
+	});
+	// 删除搜素关键词方案
+	$(document).on('click', '.legendPanel .close', function() {
+		var $me = $(this);
+		$me.parents('.panelBox').next().show();
+		$(this).parents('.legendPanel').remove();
+		var kwd=$(this).parent().find('.searchWordInput').val();
+		$("#searchWordBox .legendPanel").each(function(){
+			if($(this).find(".searchWord").text()==kwd){
+				$(this).remove();
+			}
+		});
+	});
+	
+	//选择地区第四步
+
+	
+	
+	//选择地区
+	$(document).on("click",".btnRegionPicker",function(){
+		var $flo = $(this).parent().parent().find('.regionFloatDiv');
+		if ($flo.css('visibility') == 'visible') {
+			$flo.css({
+				visibility: 'hidden'
+			});
+			return;
+		}
+		var $me = $(this);
+		$flo.css({
+			visibility: 'visible',
+			left: $me.position().left,
+			top: $me.position().top + 32
+		});
+		
+	});
+	
+	$('body').click(function(evt) {
+		var e = window.event || evt,
+			obj = $(e.srcElement || e.target);
+		if (!obj.is('.regionFloatDiv,.regionFloatDiv *') && !obj.is('#btnRegionPicker')) {
+			$('.regionFloatDiv').css('visibility', 'hidden');
+		}
+	});
+
+	$(document).on('click', '.address', function() {
+		var me = $(this).text().replace(/[\[\]]/g, '');
+		var top=$(this).parent().parent().parent().parent().parent().parent();
+		top.find('.btnRegionPicker').attr('data-value', me).text(me);
+		top.find('.regionFloatDiv').css({
+			visibility: 'hidden'
+		});
+		calculate ();
+	});
+	
+	function checkType(){
+		var type=$(".tasktype.selectedCtb").attr("value");
+		if(type=="ZWTG"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("活动推广");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$("#taokouling").hide();
+			
+			$("#erweima").hide();
+			//$("#searchImg").show();
+			addkwd();
+		}else if(type=="ORDER"){
+			$("#taokouling").hide();
+			$(".wordPlan .searchWordInput").val(" ");
+			$("#erweima").hide();
+			$("#searchImg").hide();
+			CDT.flowPrice=App.flowPrice;
+			$(".productTaobaoLine").show();
+			$(".lableKwd").text("关键词");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+		}else if(type=="SUBWAY"){
+			CDT.flowPrice=App.flowPrice;
+			$(".subwayPancel").show();
+			$("#subwayPancel").show();
+			$("#taokouling").hide();
+			$(".wordPlan .searchWordInput").val("");
+			$("#erweima").hide();
+			$("#searchImg").hide();
+			$(".productTaobaoLine").show();
+			$(".lableKwd").text("关键词");
+		}else if(type=="TKL"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").show();
+			$("#erweima").hide();
+			$("#searchImg").hide();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("淘口令");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if(type=="JHS"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").hide();
+			
+			$("#erweima").hide();
+			//$("#searchImg").show();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("聚划算");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if(type=="TQG"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").hide();
+			
+			$("#erweima").hide();
+			//$("#searchImg").show();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("淘抢购");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if(type=="TKMP"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").hide();
+			
+			$("#erweima").hide();
+			//$("#searchImg").show();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("淘客秒拍");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if(type=="TJB"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").hide();
+			
+			$("#erweima").hide();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("淘金币");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if(type=="TTTJ"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").hide();
+			
+			$("#erweima").hide();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("天天特价");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if(type=="RWM"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").hide();
+			
+			$("#erweima").show();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("二维码");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}
+	}
+	//选择活动推广则隐藏筛选条件部分
+	$(document).on('click' , '.tasktype' , function(){
+		$(".tasktype").removeClass("selectedCtb");
+		$(this).addClass("selectedCtb")
+		if($(this).attr("value")=="ZWTG"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$(".productTaobaoLine").hide();
+			$("#taokouling").show();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("活动推广");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$("#erweima").hide();
+			//$("#searchImg").show();
+			addkwd();
+		}else if($(this).attr("value")=="ORDER"){
+			$("#taokouling").hide();
+			$("#erweima").hide();
+			$("#searchImg").hide();
+			CDT.flowPrice=App.flowPrice;
+			$(".productTaobaoLine").show();
+			$(".wordPlan .searchWordInput").val("");
+			$(".lableKwd").text("关键词");
+			$(".wordPlan .searchWordInput").removeAttr("readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+		}else if($(this).attr("value")=="SUBWAY"){
+			CDT.flowPrice=App.flowPrice;
+			$(".subwayPancel").show();
+			$("#subwayPancel").show();
+			$("#taokouling").hide();
+			$(".wordPlan .searchWordInput").val("");
+			$(".wordPlan .searchWordInput").removeAttr("readonly");
+			$("#erweima").hide();
+			$("#searchImg").hide();
+			$(".productTaobaoLine").show();
+			$(".lableKwd").text("关键词");
+		}else if($(this).attr("value")=="TKL"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").show();
+			$("#erweima").hide();
+			$("#searchImg").hide();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("淘口令");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if($(this).attr("value")=="JHS"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").show();
+			$("#erweima").hide();
+			//$("#searchImg").show();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("聚划算");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if($(this).attr("value")=="TQG"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").show();
+			
+			$("#erweima").hide();
+			//$("#searchImg").show();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("淘抢购");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if($(this).attr("value")=="TKMP"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").show();
+			$("#erweima").hide();
+			//$("#searchImg").show();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("淘客秒拍");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if($(this).attr("value")=="TJB"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").show();
+			$("#erweima").hide();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("淘金币");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if($(this).attr("value")=="TTTJ"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").show();
+			$("#erweima").hide();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("天天特价");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}else if($(this).attr("value")=="RWM"){
+			CDT.flowPrice=App.tgFlowPrice;
+			$("#taokouling").hide();
+			$("#erweima").show();
+			$(".productTaobaoLine").hide();
+			$(".lableKwd").text("活动任务类型");
+			$(".wordPlan .searchWordInput").val("二维码");
+			$(".wordPlan .searchWordInput").attr("readonly","readonly");
+			$(".subwayPancel").hide();
+			$("#subwayPancel").hide();
+			addkwd();
+		}
+		
+//		if($(this).attr("value")=="ZWTG"){
+//			CDT.flowPrice=App.tgFlowPrice;
+//			$(".productTaobaoLine").hide();
+//			$(".lableKwd").text("活动任务类型");
+//			
+//			$("#taokouling").hide();
+//			
+//			$("#erweima").hide();
+//			$("#searchImg").show();
+//		}else{
+//			CDT.flowPrice=App.flowPrice;
+//			$(".productTaobaoLine").show();
+//			$(".lableKwd").text("关键词");
+//			
+//			$("#taokouling").hide();
+//			
+//			$("#erweima").hide();
+//			$("#searchImg").hide();
+//		}
+//		
+//		if($(this).attr("value")=="SUBWAY"){
+//			$(".subwayPancel").show();
+//			$("#subwayPancel").show();
+//			
+//			$("#taokouling").hide();
+//			
+//			$("#erweima").hide();
+//			$("#searchImg").hide();
+//		}else{
+//			$(".subwayPancel").hide();
+//			$("#subwayPancel").hide();
+//		}
+		$("#searchPrice").text(CDT.flowPrice);
+		calculate();
+	});
+	$(document).on("change" ,".taoqizhiLimit",function(){
+		calculate();
+	});
+	//选择活动推广则隐藏筛选条件部分
+	$(document).on('click' , '.intmall' , function(){
+		$(this).parent().find(".intmall").removeClass("selectedCtb");
+		$(this).addClass("selectedCtb")
+		
+	});
+	
+	var validator = $('#flow_publish_form').validate({
+		onkeyup : false,
+		rules : {
+			'title' : {
+				required : true
+			},
+			'itemName' : {
+				required : true
+			},
+			'itemImage' : {
+				required : true
+			},
+			'itemPrice' : {
+				number : true
+			},
+			'shopName' : {
+				required : true
+			},
+			'kwd' : {
+				required : true
+			},
+			'minPrice' : {
+				/*number : true,
+				required : true*/
+				number : false,
+				required : false
+			},
+			'maxPrice' : {
+				/*number : true,
+				required : true*/
+				number : false,
+				required : false
+			},'rewardIngot':{
+				number : true,
+			},'taskStartTime':{
+				number : true,
+				min:0,
+				max:23
+			},'taskEndTime':{
+				number : true,
+				min:1,
+				max:24
+			}
+			
+
+		},
+		messages : {
+
+		}
+	});
+	
+	$("#stepNextBtn").click(function() {
+		if (!validator.form()) {
+			return false;
+		}
+		if(CDT.currentStep>=1){
+			var shop=$('#dianpuContainer .shop.selectedCtb').text();
+			if(shop==""){
+				return alert("请先绑定店铺");
+			}
+		}
+		
+		CDT.currentStep++;
+		setWap();
+
+	});
+	$("#stepPreBtn").click(function() {
+		CDT.currentStep--;
+		setWap();
+	});
+	$("#publish_submit").click(
+			function() {
+				var taskStartTime=$("#taskStartTime").val();
+				var taskEndTime=$("#taskEndTime").val();
+				if(taskStartTime==null||taskStartTime==""){
+					return alert("请选择任务开始时间");
+				}
+				if(taskEndTime==null||taskEndTime==""){
+					return alert("请选择任务结束时间");
+				}
+				if(parseInt(taskStartTime)>=parseInt(taskEndTime)){
+					return alert("开始时间必须小于结束时间");
+				}
+				var rewardIngot=$("#rewardIngot").val();
+				if(rewardIngot!=null&&rewardIngot>0){
+					rewardIngot=parseInt(rewardIngot*100);
+				}
+				var itemSubwayPicUrl="";
+				$(".subwayBoxs input[type='text']").each(function(){
+					itemSubwayPicUrl+=$(this).val()+",";
+				});
+				var commdityTypeStr = "";
+				var a= $(".commdityType.selectedCtb");
+				a.each(
+					function(){
+						  commdityTypeStr += ($(this).attr('value')+',');
+					}
+				);		
+				//活动属性
+				var tgPath="";
+				
+				var tgImg="";
+				var taskType=$('.tasktype.selectedCtb').attr('value');
+				if(taskType=="TKL"){
+					tgPath=$("#taokouling .tgPath").val();
+					if(tgPath==""){
+						return alert("淘口令不能为空");
+					}
+				}else if(taskType=="TKMP"){
+					tgPath=$("#taoke .tgPath").val();
+					if(tgPath==""){
+						return alert("淘客链接不能为空");
+					}
+					
+				}else if(taskType=="RWM"){
+					tgPath=$("#erweimaUrl").val();
+					if(tgPath==""){
+						return alert("二维码不能为空");
+					}
+				}
+				$(".searchImgBoxs input[type='text']").each(function(){
+					tgImg+=$(this).val()+",";
+				});
+				var commdityType = commdityTypeStr.substring(0,commdityTypeStr.length-1);
+				var p = {
+						'task.days': $('#days').val(),
+						'task.publishRate': $('#publishRate').val(),
+						'task.type': $('.tasktype.selectedCtb').attr('value'),
+						'task.shopId': $('#dianpuContainer .shop.selectedCtb').attr('value'),
+						'task.shopName': $('#dianpuContainer .shop.selectedCtb').text(),
+						'task.itemTitle': $('#txtItemTitle').val(),
+						'task.itemUrl': $('#txtItemUrl').val(),
+						'task.itemSubwayPicUrl': itemSubwayPicUrl,
+						'task.itemPicUrl': $('#txtItemPicUrl').val(),
+						'task.itemPrice': parseInt($('#txtItemPrice').val() * 100),
+						'task.taskRequest':$.trim($("#taskRequest").val()),
+						'task.extraRewardIngot':rewardIngot,
+						'task.genderLimit':$(".gender.selectedCtb").attr("value"),
+						'task.areaLimit': $("#citycategory").val(),
+						'task.creditLimit': $("#creditLimit").val(),
+						'task.ageLimit': $(".ageLimit.selectedCtb").attr("value"),
+						'task.commdityType': commdityType,
+						'task.browseTime': $(".browseTime.selectedCtb").attr("value"),
+						'task.taskStartTime': taskStartTime,
+						'task.taskEndTime': taskEndTime,
+						'task.sdNeed': $('.sd_need.selectedCtb').attr('data-value'),
+						'task.tgPath': tgPath,
+						'task.tgImg': tgImg,
+						'task.taoqizhiLimit': $('#taoqizhiLimit').val(),
+						'task.platform':'FLOW'
+					};
+				// 搜索关键词方案
+				setSearchPlanParam(p);
+				p['task.delaySpan'] = $('#selDelaySpan').val();
+				if (!validator.form()) {
+					return false;
+				}
+				var endTime = $("#endTime").val() == "" ? " " : $("#endTime")
+						.val()
+						+ " 00:00:00";
+				Tr.post('/publish/app/task/save', p
+				, function(data) {
+					if (data.code != 200) {
+						return alert(data.msg);
+					}
+					alert("发布任务成功");
+					location.href = "/seller/tasks";
+				});
+			});
+
+}
+
+function getChatUploaderOption(btn) {
+	var imgBox = "imgBox";
+	var option = Tr.uploadOption();
+	option.domain = 'http://' + App.QnTaskFileBucket + '.qiniudn.com/';
+	//option.domain = 'http://7xonyj.com1.z0.glb.clouddn.com/';
+	option.uptoken = CDT.uptoken;
+	option.browse_button = btn;
+	option.max_retries = 0;
+	option.init = {
+		'FileUploaded' : function(up, file, info) {
+			var res = $.parseJSON(info);
+			var imgUrl = up.getOption('domain') + res.key;
+			var imgElement = '<img class="aw-border-radius-5" style="width:100px;height:100px;" src="'
+					+ imgUrl + '" />';
+			$('#' + imgBox).html(imgElement);
+
+			if ($.trim($("#imgBox img").attr("src")) == null) {
+				alert("请选择图片！");
+			}
+			$("#txtItemPicUrl").val(imgUrl);
+		},
+		'Error' : function(up, err, errTip) {
+			alert('上传失败！');
+		}
+	};
+	return option;
+}
+
+function getErWeiMaUploaderOption(btn) {
+	var imgBox = "imgBoxtgImg";
+	var option = Tr.uploadOption();
+	option.domain = 'http://' + App.QnTaskFileBucket + '.qiniudn.com/';
+	//option.domain = 'http://7xonyj.com1.z0.glb.clouddn.com/';
+	option.uptoken = CDT.uptoken;
+	option.browse_button = btn;
+	option.max_retries = 0;
+	option.init = {
+		'FileUploaded' : function(up, file, info) {
+			var res = $.parseJSON(info);
+			var imgUrl = up.getOption('domain') + res.key;
+			var imgElement = '<img id="ewmtgImg" style="margin-left:100px;" width="100px" height="100px" name="tgImg" src="'
+					+ imgUrl + '" />';
+			$('#' + imgBox).html(imgElement);
+
+			if ($.trim($("#imgBoxtgImg img").attr("src")) == null) {
+				alert("请选择图片！");
+			}
+			$("#erweimaUrl").val(imgUrl);
+		},
+		'Error' : function(up, err, errTip) {
+			alert('上传失败！');
+		}
+	};
+	return option;
+}
+
+
+// 获取token
+function initUploader(force) {
+	Tr.post('/user/upload/token', {
+		force : force
+	}, function(data) {
+		if (data.code != 200)
+			return;
+		// 初始化SDK
+		CDT.uptoken = data.results;
+		var newButtonId = 'btnUploadDisplayPicturefiles';
+		var option = getChatUploaderOption(newButtonId);
+		option.browse_button = newButtonId;
+		new QiniuJsSDK().uploader(option);
+	});
+}
+
+//获取token
+function initSearchImgUploader(force) {
+	Tr.post('/user/upload/token', {
+		force : force
+	}, function(data) {
+		if (data.code != 200)
+			return;
+		// 初始化SDK
+		CDT.uptoken = data.results;
+		var newButtonId = 'btnUploadtgImg';
+		var option = getErWeiMaUploaderOption(newButtonId);
+		option.browse_button = newButtonId;
+		new QiniuJsSDK().uploader(option);
+	});
+}
+
+function initComdity(){
+	 var arr =App.commditytype_.split(",");
+     var i = arr.length;
+     for(var j =0;j<i;j++){
+        	var gw = arr[j];
+			$("#"+gw+"").addClass('selectedCtb');
+     }
+     if($(".commdityType.selectedCtb").length<=0){
+    	 $(".commdityType").first().addClass('selectedCtb');
+	}
+}
+$(function() {
+	initComdity();
+	setWap();
+	initBase();
+	initUploader(false);
+	initSearchImgUploader(false);
+	if($(".browseTime.selectedCtb").attr("value")==5){
+		$("#pubilshAll").show();
+		$("#pubilshEvery").hide();
+	}else if($(".browseTime.selectedCtb").attr("value")==4){
+		$("#pubilshAll").hide();
+		$("#pubilshEvery").show();
+	}else{
+		$("#pubilshAll").hide();
+		$("#pubilshEvery").hide();
+	}
+});

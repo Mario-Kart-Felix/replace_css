@@ -1,0 +1,195 @@
+CDT = {
+	memberRecordTemp : null,
+	pledgeRecordTemp : null,
+	withdrawRecordTemp :null,
+	flowRecordTemp : null,
+	taskCellTemp : null,
+	currPageNo : 1,
+	pageSize : 20,
+	type : 'ingot',
+	isReward : false,
+	userType : null,
+	minPayPrice : null,
+	rechargeType : 1
+};
+	CDT.userType = App.userType;
+	CDT.flowRecordTemp = $('#flowRecordTemp').remove().val();
+	Mustache.parse(CDT.flowRecordTemp);
+	CDT.pledgeRecordTemp = $('#pledgeRecordTemp').remove().val();
+	Mustache.parse(CDT.pledgeRecordTemp);
+	CDT.memberRecordTemp = $('#memberRecordTemp').remove().val();
+	Mustache.parse(CDT.memberRecordTemp);
+	CDT.withdrawRecordTemp = $('#withdrawRecordTemp').remove().val();
+	Mustache.parse(CDT.withdrawRecordTemp);
+	CDT.taskCellTemp = $('#taskCellTemp').remove().val();
+	Mustache.parse(CDT.taskCellTemp);
+$(function(){
+	$(document).on('click', '.fundTab', function() {
+		$(this).addClass('focus').siblings().removeClass('focus');
+		CDT.type = $(this).attr('type');
+		CDT.isReward = $(this).attr('isReward');
+		if (CDT.type == 'recharge') {
+			$('#exportDiv').show();
+		} else {
+			$('#exportDiv').hide();
+		}
+		if (CDT.type == 'ingot') {
+			$('#exportDivs').show();
+		} else {
+			$('#exportDivs').hide();
+		}
+		loadMemberRecord(1);
+	});
+	
+	/**
+	 * 导出押金记录
+	 */
+	$("#exportBtn").click(function() {
+		var count = $("#count").val();
+		var userNick = $("#userNick").val();
+		var params = "count=" + 10000 + "&vo.type=recharge";
+		location.href = "/exportPledge?" + params;
+	});
+	
+	$("#exportIngotBtn").click(function() {
+		location.href = "/seller/exportIngot";
+	});
+	
+	
+	// 默认显示第一个资金记录
+	loadMemberRecord(1);
+	
+	
+function loadMemberRecordCallBack(index, jq) {
+	loadMemberRecord(index + 1);
+}
+
+	// 加载资金记录
+	function loadMemberRecord(pageNo) {
+		Tr.get('/user/money/record/list', {
+			'vo.type' : CDT.type,
+			'vo.pageNo' : pageNo,
+			'vo.isReward' : CDT.isReward,
+			'vo.pageSize' : CDT.pageSize
+		}, function(data) {
+			if (data.code != 200)
+				return;
+			var output = '';
+			if (CDT.type == 'withdraw') {
+				if (data.results.length <= 0) {
+					output = '<div class="iconfont warnBox">&#xf00b6;</span>没有记录!';
+				} else {
+					output = Mustache.render(CDT.withdrawRecordTemp, $.extend(data,
+							{
+								applyTimeStr : function() {
+									return new Date(this.applyTime)
+											.Format('yyyy-MM-dd hh:mm');
+								},
+								endTimeStr : function() {
+									return new Date(this.endTime)
+											.Format('yyyy-MM-dd hh:mm');
+								},
+								amountStr : function() {
+									return $.number(this.amount / 100, 2);
+								},
+								applyAmountStr : function() {
+									return $.number(this.applyAmount / 100, 2);
+								},
+								statusStr : function() {
+									if (this.status == 'WAIT') {
+										return '待处理';
+									}
+									if (this.status == 'FINISHED') {
+										return '已退款';
+									}
+									if (this.status == 'PROCESSING') {
+										return '处理中';
+									}
+								}
+							}));
+				}
+			}
+			if (CDT.type == 'member') {
+				if (data.results.length <= 0) {
+					output = '<div class="iconfont warnBox">&#xf00b6;没有记录!</div>';
+				} else {
+					output = Mustache.render(CDT.memberRecordTemp, $.extend(data, {
+						createTimeStr : function() {
+							return new Date(this.createTime)
+									.Format('yyyy-MM-dd hh:mm');
+						},
+						endTimeStr : function() {
+							return new Date(this.endTime)
+									.Format('yyyy-MM-dd hh:mm');
+						},
+						amountStr : function() {
+							return $.number(this.amount / 100, 2);
+						},
+						ingotStr : function() {
+							return $.number(this.ingot / 100, 2);
+						}
+					}));
+				}
+			}
+			if (CDT.type == 'pledge' || CDT.type == 'ingot'
+					|| CDT.type == 'premium' || CDT.type == 'deposit'
+					|| CDT.type == 'recharge' || CDT.type == 'ingotrecharge') {
+				if (data.results.length <= 0) {
+					output = '<div class="iconfont warnBox">&#xf00b6;没有记录!</div>';
+				} else {
+					output = Mustache.render(CDT.pledgeRecordTemp, $.extend(data, {
+						createTimeStr : function() {
+							return new Date(this.createTime)
+									.Format('yyyy-MM-dd hh:mm');
+						},
+						plusAmountStr : function() {
+							if (this.sign == 'PLUS')
+								return $.number(this.amount / 100, 2) + '元';
+						},
+						minusAmountStr : function() {
+							if (this.sign == 'MINUS')
+								return $.number(this.amount / 100, 2) + '元';
+						},
+						balanceStr : function() {
+							return $.number(this.balance / 100, 2);
+						}
+					}));
+				}
+			}
+			if (CDT.type == 'flow') {
+				if (data.results.length <= 0) {
+					output = '<div class="iconfont warnBox">&#xf00b6;没有记录!</div>';
+				} else {
+					output = Mustache.render(CDT.flowRecordTemp, $.extend(data, {
+						createTimeStr : function() {
+							return new Date(this.createTime)
+									.Format('yyyy-MM-dd hh:mm');
+						},
+						plusAmountStr : function() {
+							if (this.sign == 'PLUS')
+								return this.amount + "个";
+						},
+						minusAmountStr : function() {
+							if (this.sign == 'MINUS')
+								return this.amount + "个";
+						},
+						balanceStr : function() {
+							return this.balance + "个";
+						}
+					}));
+				}
+			}
+			
+			$('#recordContainer').html(output);
+			$('.pagination').pagination(data.totalCount, {
+				items_per_page : CDT.pageSize,
+				num_display_entries : 5,
+				current_page : pageNo,
+				num_edge_entries : 2,
+				callback : loadMemberRecordCallBack,
+				callback_run : false
+			});
+			CDT.currPageNo = pageNo;
+		});
+	}
+});

@@ -1,0 +1,210 @@
+CDT = {
+	dataId:null,
+	rowTemp: null,
+	currPageNo: 1,
+	pageSize: 20,
+	type: 'SELF',
+	workOrderDetailTemp: null
+};
+
+
+//修改用户单个信息函数
+function loadPage(pageNo){
+	var createTimeStart = ($.trim($('#createTimeStart').val()))?$.trim($('#createTimeStart').val()) + ' 00:00:00' : '',
+		createTimeEnd = ($.trim($('#createTimeEnd').val()))?$.trim($('#createTimeEnd').val()) + ' 00:00:00' : '';
+	Tr.get('/user/workOrder/list', {
+		'vo.taskId':$.trim($("#taskId").val()),
+		'vo.buyerTaskId':$.trim($("#buyerTaskId").val()),
+		'vo.jobType':$("#jobType").val(),
+		'vo.type': CDT.type,
+		'vo.workStatus': $("#workStatus").val(),
+		'vo.createTimeStart':createTimeStart,
+		'vo.createTimeEnd':createTimeEnd,
+		'vo.pageNo': pageNo,
+		'vo.pageSize': CDT.pageSize
+	}, function(data) {
+		if (data.code != 200) return;
+		if (data.results.length <= 0) {
+			$('.normTable').hide();
+			$('.pagin-btm').hide();
+			$('#noMsg').show();
+			return;
+		}
+		var output = Mustache.render(CDT.rowTemp, $.extend(data, {
+			createTimeStr: function() {
+				return this.createTime==null?"-----------------------":new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			manageTimeStr: function() {
+				return this.manageTime==null?"-----------------------":new Date(this.manageTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			finishTimeStr: function() {
+				return this.finishTime==null?"-----------------------":new Date(this.finishTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			jobTypeStr: function() {
+				if(this.jobType=="S01") {
+					return "没按路径要求入店下单、没按任务要求接单";
+				}else if(this.jobType=="S02") {
+					return "秒开秒拍，聊天不符合要求";
+				}else if(this.jobType=="S03") {
+					return "催买手马上做任务";
+				}else if(this.jobType=="S04") {
+					return "没留言导致真实发货了";
+				}else if(this.jobType=="S05") {
+					return "商家自己原因真实发货了";
+				}else if(this.jobType=="S06") {
+					return "手机单用电脑下单";
+				}else if(this.jobType=="S07") {
+					return "拍错产品了";
+				}else if(this.jobType=="S08") {
+					return "没上传买家秀或评价不合格";
+				}else if(this.jobType=="S09") {
+					return "物流没显示签收提前确认好评";
+				}else if(this.jobType=="S10") {
+					return "淘宝没有付款（飞单）";
+				}else if(this.jobType=="S99") {
+					return "其他";
+				}else if(this.jobType=="B01") {
+					return "找不到任务里的宝贝";
+				}else if(this.jobType=="B02") {
+					return "下单金额超出任务要求金额的150%";
+				}else if(this.jobType=="B03") {
+					return "任务里提供的图片与下单宝贝图片不一样";
+				}else if(this.jobType=="B04") {
+					return "淘宝后台已经超出24小时没有点发货";
+				}else if(this.jobType=="B05") {
+					return "商家已经返款，财付通没收到钱";
+				}else if(this.jobType=="B06") {
+					return "返款金额与下单金额不一样";
+				}else if(this.jobType=="B07") {
+					return "快递跟踪信息停在中途不更新了";
+				}else if(this.jobType=="B08") {
+					return "催商家及时处理发货";
+				}else if(this.jobType=="B09") {
+					return "催商家及时处理返款";
+				}else {
+					return "其他";
+				}
+			},
+			workStatusStr: function() {
+		    	if(this.workStatus=="WAIT") {
+		    		return "待处理";
+		    	}else if(this.workStatus=="PROCESSING") {
+		    		return "处理中";
+		    	}else {
+		    		return "已完成";
+		    	}
+			},
+			itemTitleStr: function() {
+				if(this.itemTitle.length>=3) {
+					return this.itemTitle.substring(0, 3) + "**************";
+				}
+				return this.itemTitle;
+			}
+			
+		}));
+		$('.normTable').show();
+		$('#noMsg').hide();
+		$('.pagin-btm').show();
+		$('#accountContainer').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadAccountCallBack,
+			callback_run: false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function loadAccountCallBack(index, jq) {
+	loadPage(index + 1);
+}
+
+function initBase(){
+	
+	$(document).on('click', '#queryBtn', function() {
+		loadPage(1);
+	});
+	
+	$(document).on('click','.modifyBtn',function(){
+		$('#spUserNick').text($(this).parents('tr').find('.userNick').text());
+		$("#suggestContent").text($(this).attr("data-content"));
+		$("#suggestAnswer").text($(this).attr("data-answer"));
+		Tr.popup('modifyAccountWnd');
+	});
+	
+	$("#closeWnd").click(function(){
+		$("#modifyAccountWnd").hide();
+	});
+	
+	$('.inputDate').datePicker({
+		startDate: '2014-01-01',
+		endDate: '2020-01-01',
+		clickInput: true,
+		verticalOffset: 35
+	});
+	
+	/*$("#createTimeStart").datetimepicker({format:'Y-m-d H:i:s',formatDate:'Y-m-d'});
+	$("#createTimeEnd").datetimepicker({format:'Y-m-d H:i:s',formatDate:'Y-m-d'});*/
+	
+	$(document).on('click', '.tabSwitchWrapper .chargeTypeTab', function(){
+		$(this).addClass('focus').siblings().removeClass('focus');
+		CDT.type= $(this).attr('type');
+		if(CDT.type=="LINK") {
+			$("#jobType").hide();
+			$("#jobTypeText").hide();
+		}else {
+			$("#jobType").show();
+			$("#jobTypeText").show();
+		}
+		loadPage(1);
+	});
+	
+	/*$(document).on('click', '.foundTypeSwitchWrapper .foundTab', function(){
+		$(this).addClass('focus').siblings().removeClass('focus');
+		CDT.type= $(this).attr('type');
+		if(CDT.type=="LINK") {
+			$("#jobType").hide();
+			$("#jobTypeText").hide();
+		}else {
+			$("#jobType").show();
+			$("#jobTypeText").show();
+		}
+		loadPage(1);
+	});*/
+	//显示详情
+	$(document).on('click', '.J_viewBuyerTask', function() {
+		var $me =$(this),
+		id = $(this).attr('data-id');
+		if(!$me.parents('tr').next('tr').is(':visible')){
+			$me.parents('tr').next('tr').show(); 
+			Tr.get('/user/workOrder/detail', {
+				'id': id
+			}, function(data) {
+				if (data.code != 200) return;
+				var output = Mustache.render(CDT.workOrderDetailTemp, $.extend(data, {
+				}));
+				$me.parents('tr').next('tr').find('.workOrderDetail').html(output); 
+			});       
+		}
+		else{
+			$me.parents('tr').next('tr').hide();
+		}
+		
+	});
+	
+}
+
+$(function(){
+	// 自定义消息格式
+	initBase();
+	CDT.rowTemp = $('#rowTemp').remove().val();
+	Mustache.parse(CDT.rowTemp);
+	
+	CDT.workOrderDetailTemp = $('#workOrderDetailTemp').remove().val();
+	Mustache.parse(CDT.workOrderDetailTemp);
+	
+	loadPage(1);
+});

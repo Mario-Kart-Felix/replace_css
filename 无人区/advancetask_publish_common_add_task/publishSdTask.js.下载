@@ -1,0 +1,942 @@
+var CDT = {
+		buyerAccountTempl: null,
+		keywordTempl: null,
+		currPageNo:1,
+		pageSize:10,
+		buyerAccountNick:new Array(),
+		buyerAccountId:new Array(),
+		totalCount:0,
+		itemPrice:0,
+		itemByNum:0,
+		fee:0,
+		kuaidifee:0,
+		sysfound:0,
+		sysfoundFee:0,
+		expressIngot:3,
+		baseOrderFee:8,
+		totalFee:0,
+		totalComssion:0,
+		comssionFee:0,
+		extraReward:0,
+		chatImgPrice:0.5,
+		huobiImgPrice:0.5,
+		huabeiAccountPrice:2,//花呗号价格
+		limitPrice:1,
+		ageLimitStr:"",
+		commdityTypeStr:"",
+		type:0,
+		taoqizhi_500:0.5,
+		taoqizhi_700:1,
+		taoqizhi_1000:2,
+		heihao_price:2
+};
+
+function calculate(){
+	var itemPrice=$("#sdtxtItemPrice").val();
+	var itemByNum=$("#itemBuyNum").val();
+	var extraReward=$("#extraReward").val();
+	var chat=$(".sdChat.selectedCtb").attr("data-value");
+	var huobi=$(".huobi.selectedCtb").attr("data-value");
+	CDT.itemByNum=itemByNum;
+	CDT.itemPrice=itemPrice;
+	//押金费用
+	CDT.fee=parseFloat(CDT.itemByNum*(CDT.itemPrice*100)*CDT.totalCount/100);
+	if($(".expressType.selectedCtb").attr("data-value")=="SELLERKD"){
+		CDT.expressIngot=0;
+	}else{
+		CDT.expressIngot=3;
+	}
+	//快递费用
+	CDT.kuaidifee=CDT.totalCount*CDT.expressIngot;
+	//佣金费用
+	CDT.comssionFee=commissionTable(CDT.itemByNum*(CDT.itemPrice*100)/100);
+	CDT.totalComssion=CDT.totalCount*CDT.comssionFee;
+	CDT.extraReward=CDT.totalCount*extraReward;
+	CDT.sysfound=getSysRefound(CDT.itemByNum*CDT.itemPrice);
+	CDT.sysfoundFee=CDT.totalCount*CDT.sysfound;
+	
+	var huobiPrice=0;
+	var chatPrice=0;
+	if(chat=="true"){
+		CDT.chatImgPrice=0.5;
+		chatPrice=CDT.totalCount*(CDT.chatImgPrice*100)/100;
+	}else{
+		CDT.chatImgPrice=0;
+	}
+	if(huobi=="true"){
+		CDT.huobiImgPrice=0.5;
+		huobiPrice=CDT.totalCount*(CDT.huobiImgPrice*100)/100;
+	}else{
+		CDT.huobiImgPrice=0;
+	}
+	
+	//增值服务费用
+	//todo
+	var genderPrice=0;
+	var creditLimitPrice=0;
+	var areaLimitPrice=0;
+	var ageLimitPrice=0;
+	var commdityTypeStrPrice=0;
+	var huabeiPrice=0;
+	var taoqizhiPrice=0;
+	
+	var gender=$(".gender.selectedCtb").attr("value");
+	if(gender=="男"||gender=="女"){
+		genderPrice=CDT.limitPrice;
+	}else{
+		genderPrice=0;
+	}
+	
+	var huebei=$(".huabeiAccount.selectedCtb").attr("data-value");
+	if(huebei=="true"){
+		huabeiPrice=CDT.huabeiAccountPrice;
+	}else{
+		huabeiPrice=0;
+	}
+	
+	var creditLimit=$("#creditLimit").val();
+	if(creditLimit!=""){
+		if(creditLimit=="BRICK_1"){
+			creditLimitPrice=2;
+		}else{
+			creditLimitPrice=CDT.limitPrice;
+		}
+	}else{
+		creditLimitPrice=0;
+	}
+	
+	var areaLimit=$("#citycategory").val();
+	if(areaLimit!="全国"){
+		areaLimitPrice=CDT.limitPrice;
+	}else{
+		areaLimitPrice=0;
+	}
+	
+	var ageLimit = "";
+	var a= $(".ageLimit.selectedCtb");
+	a.each(
+		function(){
+			ageLimit += ($(this).attr('value')+',');
+		}
+	);			
+	var ageLimitStr = ageLimit.substring(0,ageLimit.length-1);
+	if(ageLimitStr!=null&&ageLimitStr!=""&&ageLimitStr!="0"){
+		ageLimitPrice=CDT.limitPrice;
+	}else{
+		ageLimitPrice=0;
+	}
+	CDT.ageLimitStr=ageLimitStr;
+	var commdityTypeStr = "";
+	var a= $(".commdityType.selectedCtb");
+	a.each(
+		function(){
+			  commdityTypeStr += ($(this).attr('value')+',');
+		}
+	);			
+	var commdityType = commdityTypeStr.substring(0,commdityTypeStr.length-1);
+	if(commdityType!=null&&commdityType!=""){
+		commdityTypeStrPrice=CDT.limitPrice;
+	}else{
+		commdityTypeStrPrice=0;
+	}
+	CDT.commdityTypeStr=commdityTypeStr;
+	
+	var taoqizhi = $("#taoqizhiLimit").val();
+	if(taoqizhi!=null&&taoqizhi!=""){
+		if(parseInt(taoqizhi)==500){
+			taoqizhiPrice=CDT.taoqizhi_500;
+		}else if(parseInt(taoqizhi)==700){
+			taoqizhiPrice=CDT.taoqizhi_700;
+		}else if(parseInt(taoqizhi)==1000){
+			taoqizhiPrice=CDT.taoqizhi_1000;
+		}
+		
+	}else{
+		taoqizhiPrice=0;
+	}
+	
+	var totalgenderPrice=CDT.totalCount*genderPrice;
+	var totalcreditLimitPrice=CDT.totalCount*creditLimitPrice;
+	var totalareaLimitPrice=CDT.totalCount*areaLimitPrice;
+	var totalageLimitPrice=CDT.totalCount*ageLimitPrice;
+	var totalcommdityTypeStrPrice=CDT.totalCount*commdityTypeStrPrice;
+	var totalHuabeiPrice=CDT.totalCount*huabeiPrice;
+	var totalTaoqizhiPrice=CDT.totalCount*taoqizhiPrice;
+	var totalHeiHaoPrice=CDT.totalCount*CDT.heihao_price;
+	
+	$("#heihaotext").text(CDT.totalCount+"单x"+CDT.heihao_price);
+	$("#heihaoIngot").text(Math.round(totalHeiHaoPrice));
+	
+	$("#gendertext").text(CDT.totalCount+"单x"+genderPrice);
+	$("#genderIngot").text(Math.round(totalgenderPrice));
+	
+	$("#huabeittext").text(CDT.totalCount+"单x"+huabeiPrice);
+	$("#huabeiIngot").text(Math.round(totalHuabeiPrice));
+	
+	$("#creditLimittext").text(CDT.totalCount+"单x"+creditLimitPrice);
+	$("#creditLimitIngot").text(Math.round(totalcreditLimitPrice));
+	
+	$("#areaLimittext").text(CDT.totalCount+"单x"+areaLimitPrice);
+	$("#areaLimitIngot").text(Math.round(totalareaLimitPrice));
+	
+	$("#ageLimittext").text(CDT.totalCount+"单x"+ageLimitPrice);
+	$("#ageLimitIngot").text(Math.round(totalageLimitPrice));
+	
+	$("#commdityTypetext").text(CDT.totalCount+"单x"+commdityTypeStrPrice);
+	$("#commdityTypeIngot").text(Math.round(totalcommdityTypeStrPrice));
+	
+	$("#taoqizhitext").text(CDT.totalCount+"单x"+taoqizhiPrice);
+	$("#taoqizhiIngot").text(Math.round(totalTaoqizhiPrice));
+	
+	CDT.totalFee=CDT.fee+CDT.kuaidifee+CDT.totalComssion+CDT.sysfoundFee+CDT.extraReward+huobiPrice+chatPrice+totalgenderPrice+totalcreditLimitPrice+totalareaLimitPrice+totalageLimitPrice+totalcommdityTypeStrPrice+totalHuabeiPrice+totalTaoqizhiPrice+totalHeiHaoPrice;
+	$("#tasktext").text(CDT.totalCount+"单x"+CDT.itemByNum+"x"+CDT.itemPrice);
+	$("#taskIngot").text(Math.round(CDT.fee*100)/100);
+	
+	$("#sysrefoundtext").text(CDT.totalCount+"单x"+CDT.sysfound);
+	$("#sysrefoundIngot").text(CDT.sysfoundFee);
+	
+	$("#expresstext").text(CDT.totalCount+"单x"+CDT.expressIngot);
+	$("#expressIngot").text(CDT.kuaidifee);
+	
+	$("#comssiontext").text(CDT.totalCount+"单x"+CDT.comssionFee);
+	$("#comssionIngot").text(Math.round(CDT.totalComssion));
+	
+	$("#extraIngottext").text(CDT.totalCount+"单x"+extraReward);
+	$("#extraIngotIngot").text(Math.round(CDT.extraReward));
+	
+	$("#chattext").text(CDT.totalCount+"单x"+CDT.chatImgPrice);
+	$("#chatIngot").text(chatPrice);
+	
+	$("#huobitext").text(CDT.totalCount+"单x"+CDT.huobiImgPrice);
+	$("#huobiIngot").text(huobiPrice);
+	
+	$("#totalFee").text(Math.round(CDT.totalFee*100)/100);
+	
+}
+//获取佣金
+function commissionTable(price) {
+	if (price < 50.01) {
+		return CDT.baseOrderFee;
+	}
+	return Math.ceil((price - 100) / 100) + CDT.baseOrderFee;
+}
+//平台返款
+function getSysRefound(price) {
+	return Math.ceil(price*2/1000)+1;
+}
+function loadAccount(pageNo) {
+	var itemUrl = $.trim($('#itemUrl').val());
+	var days= $.trim($('#sdDays').val());
+	Tr.get('/user/sdsubTask/findSdBuyerAccount', {
+		'vo.days': days,
+		'vo.url': itemUrl,
+		'vo.pageNo': pageNo,
+		'vo.pageSize': CDT.pageSize,
+		'type':CDT.type
+	}, function(data) {
+		if (data.code != 200) {
+			return alert(data.msg);
+		}
+		if (data.results.length <= 0) {
+			$('#noMsg').show();
+			$("#textAccountTip").text("没有买号");
+			$('.pagin-btm').hide();
+			return;
+		}
+		var output = Mustache.render(CDT.buyerAccountTempl, $.extend(data, {
+			genderStr:function(){
+				if(this.gender =='MALE'){
+					return '男';
+				}
+				if(this.gender =='FEMALE'){
+					return '女';
+				}
+			},
+			collectProductImg:function(){
+				if(this.collectProduct ==true){
+					return '已收藏';
+				}
+				if(this.collectProduct ==false){
+					return '未收藏';
+				}
+			},
+			shoppingCartImg:function(){
+				if(this.shoppingCart ==true){
+					return '已加购';
+				}
+				if(this.shoppingCart ==false){
+					return '未加购';
+				}
+			},
+			creditImg: function(){
+				if(this.credit == 'HEART_1'){
+					return "/public/images/ico-taobao/heart-1.gif";
+				}
+				if(this.credit == 'HEART_2'){
+					return "/public/images/ico-taobao/heart-2.gif";
+				}
+				if(this.credit == 'HEART_3'){
+					return "/public/images/ico-taobao/heart-3.gif";
+				}
+				if(this.credit == 'HEART_4'){
+					return "/public/images/ico-taobao/heart-4.gif";
+				}
+				if(this.credit == 'HEART_5'){
+					return "/public/images/ico-taobao/heart-5.gif";
+				}
+				if(this.credit == 'BRICK_1'){
+					return "/public/images/ico-taobao/brick-1.gif";
+				}
+				if(this.credit == 'BRICK_2'){
+					return "/public/images/ico-taobao/brick-2.gif";
+				}
+				if(this.credit == 'BRICK_3'){
+					return "/public/images/ico-taobao/brick-3.gif";
+				}
+				if(this.credit == 'BRICK_4'){
+					return "/public/images/ico-taobao/brick-4.gif";
+				}
+				if(this.credit == 'BRICK_5'){
+					return "/public/images/ico-taobao/brick-5.gif";
+				}
+				if(this.credit == 'CROWN_1'){
+					return "/public/images/ico-taobao/corwn-1.gif";
+				}
+				if(this.credit == 'CROWN_2'){
+					return "/public/images/ico-taobao/corwn-2.gif";
+				}
+				if(this.credit == 'CROWN_3'){
+					return "/public/images/ico-taobao/corwn-3.gif";
+				}
+				if(this.credit == 'CROWN_4'){
+					return "/public/images/ico-taobao/corwn-4.gif";
+				}
+				if(this.credit == 'CROWN_5'){
+					return "/public/images/ico-taobao/corwn-5.gif";
+				}
+			},
+			takenTimeStrFlow:function(){
+				if(this.takenTime==null){
+					return "未浏览";
+				}
+				return new Date(this.takenTime).Format('yyyy-MM-dd'); 
+			},
+			buyTimeStr:function(){
+				if(this.buyTime!=null){
+					return new Date(this.buyTime).Format('yyyy-MM-dd'); 
+				}
+				return '没有购买'; 
+			}
+		}));
+		
+		$('.normTable').show();
+		$('#noMsg').hide();
+		$('.pagin-btm').show();
+		$('#accountContainer').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadAccountCallBack,
+			callback_run: false
+		});
+		checkAccount();
+		CDT.currPageNo = pageNo;
+	});
+}
+function loadAccountCallBack(index, jq) {
+	loadAccount(index + 1);
+	$("#buyerAccountCheck").removeAttr("checked");
+	
+}
+function initBase(){
+	if (!$('.expressType').hasClass('selectedCtb')) {
+		$('.expressType').first().addClass("selectedCtb");
+	}
+	
+	$("#buyerAccountCheck").click(function(){
+		if($(this).is(":checked")){
+			$(".buyerAccountCheck").attr("checked",'true');
+		}else{
+			$(".buyerAccountCheck").removeAttr("checked");
+		}
+		buyerAccountCheck();
+	});
+	var commdityTypeStrs=$("#commdityTypeStr").val();
+	var commdityType=commdityTypeStrs.split(",");
+	for (var i = 0; i < commdityType.length; i++) {
+		var a=commdityType[i];
+		if(a!=""&&a!=null){
+			$(".commdityType[value="+a+"]").addClass("selectedCtb");
+		}
+	}
+	var validator = $('#flow_publish_form').validate({
+		onkeyup : false,
+		rules : {
+			'itemUrl' : {
+				required : true
+			},
+			'sdTotalCount' : {
+				required : true
+			},
+			'sditemPrice' : {
+				required : true
+			},
+			'itemBuyNum' : {
+				number : true
+			},
+			'sdDays' : {
+				number : true,
+				max:20
+			}
+		},
+		messages : {
+
+		}
+	});
+	
+	$("#publish_submit").click(function(){
+		if (!validator.form()) {
+			return false;
+		}
+		var p = {
+				'task.itemUrl': $('#itemUrl').val(),
+				'task.dalayReceive': $('#dalayReceive').val(),
+				'task.itemPicUrl': $('#picupload5').val(),
+				'task.totalCount': CDT.totalCount,
+				'task.itemPrice': Math.round($('#sdtxtItemPrice').val() * 100),
+				'task.itemBuyNum': $('#itemBuyNum').attr('value'),
+				'task.sku': $('#skus').val(),
+				'task.chat': $(".sdChat.selectedCtb").attr("data-value"),
+				'task.huobi': $(".huobi.selectedCtb").attr("data-value"),
+				'task.avgPublish': $(".avgPublish.selectedCtb").attr("data-value"),
+				'task.message': $('#sdMessage').val(),
+				'task.coupon': $("#coupon").attr("data-value"),
+				'task.taojinbi': $("#sdTaojinbi").attr("data-value"),
+				'task.huabei':$("#sdHuabei").attr("data-value") ,
+				'task.taskRequest':$.trim($("#taskRequest").val()),
+				'task.minTime':$("#sdMinTime").val(),
+				'task.maxTime':$("#sdMaxTime").val(),
+				'task.expressType': $(".expressType.selectedCtb").attr("data-value"),
+				'task.preBuyerAccount': $("#sdPreAccount").attr("data-value"),
+				'task.days': $("#sdDays").val(),
+				'task.weight': $("#weight").val(),
+				'task.name':$("#taskName").val(),
+				'task.itemLongImg':$("#picupload7").val(),
+				'task.comment':$(".comment.selectedCtb").attr("data-value"),
+				'task.extraReward':Math.round($('#extraReward').val() * 100),
+				'task.timeCancel':$("#timeCancel").hasClass("inputCheckBox-checked"),
+				'task.genderLimit':$(".gender.selectedCtb").attr("value"),
+				'task.areaLimit':$("#citycategory").val(),
+				'task.creditLimit':$("#creditLimit").val(),
+				'task.ageLimit':CDT.ageLimitStr,
+				'task.commdityType':CDT.commdityTypeStr,
+				'task.huabeiAccount':$(".huabeiAccount.selectedCtb").attr("data-value"),
+				'task.taoqizhiLimit':$("#taoqizhiLimit").val(),
+				'task.searchPrice':$("#sdtxtSearchPrice").val()
+			};
+		getParams(p);
+		Tr.post('/seller/sdTask/saveSdTask', p
+				, function(data) {
+					if (data.code != 200) {
+						return alert(data.msg);
+					}
+					alert("发布任务成功");
+					location.href = "/app/sdsub/sellerSdTask";
+				});
+	});
+	
+	$("#publish_waitPay_submit").click(function(){
+		if (!validator.form()) {
+			return false;
+		}
+		var p = {
+				'task.itemUrl': $('#itemUrl').val(),
+				'task.dalayReceive': $('#dalayReceive').val(),
+				'task.itemPicUrl': $('#picupload5').val(),
+				'task.totalCount': CDT.totalCount,
+				'task.itemPrice': Math.round($('#sdtxtItemPrice').val() * 100),
+				'task.itemBuyNum': $('#itemBuyNum').attr('value'),
+				'task.sku': $('#skus').val(),
+				'task.chat': $(".sdChat.selectedCtb").attr("data-value"),
+				'task.huobi': $(".huobi.selectedCtb").attr("data-value"),
+				'task.avgPublish': $(".avgPublish.selectedCtb").attr("data-value"),
+				'task.message': $('#sdMessage').val(),
+				'task.coupon': $("#coupon").attr("data-value"),
+				'task.taojinbi': $("#sdTaojinbi").attr("data-value"),
+				'task.huabei':$("#sdHuabei").attr("data-value") ,
+				'task.taskRequest':$.trim($("#taskRequest").val()),
+				'task.minTime':$("#sdMinTime").val(),
+				'task.maxTime':$("#sdMaxTime").val(),
+				'task.expressType': $(".expressType.selectedCtb").attr("data-value"),
+				'task.preBuyerAccount': $("#sdPreAccount").attr("data-value"),
+				'task.days': $("#sdDays").val(),
+				'task.weight': $("#weight").val(),
+				'task.name':$("#taskName").val(),
+				'task.itemLongImg':$("#picupload7").val(),
+				'task.comment':$(".comment.selectedCtb").attr("data-value"),
+				'task.extraReward':Math.round($('#extraReward').val() * 100),
+				'task.timeCancel':$("#timeCancel").hasClass("inputCheckBox-checked"),
+				'task.genderLimit':$(".gender.selectedCtb").attr("value"),
+				'task.areaLimit':$("#citycategory").val(),
+				'task.creditLimit':$("#creditLimit").val(),
+				'task.ageLimit':CDT.ageLimitStr,
+				'task.commdityType':CDT.commdityTypeStr,
+				'task.huabeiAccount':$(".huabeiAccount.selectedCtb").attr("data-value"),
+				'task.taoqizhiLimit':$("#taoqizhiLimit").val(),
+				'task.searchPrice':$("#sdtxtSearchPrice").val()
+			};
+		getParams(p);
+		Tr.post('/seller/sdTask/saveWaitPaySdTask', p
+				, function(data) {
+					if (data.code != 200) {
+						return alert(data.msg);
+					}
+					alert("任务保存成功，别忘了支付哦");
+					location.href = "/app/sdsub/sellerSdTask";
+				});
+	});
+}
+function checkAccount(){
+	var ids=CDT.buyerAccountId.join(",");
+		$(".buyerAccountCheck").each(function(){
+			if(ids.indexOf($(this).attr("data-uid"))>=0){
+				$(this).attr("checked",'true');
+			}
+		});
+}
+
+function getNum(){
+	var count=0;
+	var wordPlanBoxesNum = [];
+	$.merge(wordPlanBoxesNum, $('#keywordPancel .sec.keyword '));
+	$(wordPlanBoxesNum).each(function(n) {
+		var words = $.trim($(this).find('input[name="keyword"]').val());
+		if(words!=null&&words!=""){
+			var num = $.trim($(this).find('input[name="num"]').val());
+			count+=parseInt(num);
+		}
+	});
+	var img="";
+	if($("#picupload1").val()!=""&&$("#picupload1").val()!=null){
+		img+=$("#picupload1").val()+",";
+	}
+	if($("#picupload2").val()!=""&&$("#picupload2").val()!=null){
+		img+=$("#picupload2").val()+",";
+	}
+	if($("#picupload3").val()!=""&&$("#picupload3").val()!=null){
+		img+=$("#picupload3").val()+",";
+	}
+	if(img!=""){
+		wordPlanBoxesNum = [];
+		$.merge(wordPlanBoxesNum, $('#subwayPancel .sec.keyword'));
+		$(wordPlanBoxesNum).each(function(n) {
+			var words = $.trim($(this).find('input[name="keyword"]').val());
+			if(words!=null&&words!=""){
+				var num = $.trim($(this).find('input[name="num"]').val());
+				count+=parseInt(num);
+			}
+		});
+	}
+	
+	
+	var tkl=$("#tklPancel").find("input[name='tkl']").val();
+	var tklNum=$("#tklPancel").find("input[name='num']").val();
+	if(tkl!=null&&tkl!=""&&tklNum!=""&&parseInt(tklNum)>0){
+		count+=parseInt(tklNum);
+	}
+	
+	var link=$("#linkPancel").find("input[name='link']").val();
+	var linkNum=$("#linkPancel").find("input[name='num']").val();
+	if(link!=null&&link!=""&&linkNum!=""&&parseInt(linkNum)>0){
+		count+=parseInt(linkNum);
+	}
+	
+	var ewm=$("#picupload4").val();
+	var ewmNum=$("#ewmPancel").find("input[name='num']").val();
+	if(ewm!=null&&ewm!=""&&ewmNum!=""&&parseInt(ewmNum)>0){
+		count+=parseInt(ewmNum);
+	}
+	CDT.totalCount=count;
+	calculate();
+}
+
+function getParams(paramMap){
+	var wordPlanBoxesNum = [];
+	$.merge(wordPlanBoxesNum, $('#keywordPancel .sec.keyword '));
+	var j=0;
+	$(wordPlanBoxesNum).each(function(n) {
+		var words = $.trim($(this).find('input[name="keyword"]').val());
+		if(words!=null&&words!=""){
+			var orderSort = $.trim($(this).find('select[name="orderSort"]').val());
+			var minPrice = $.trim($(this).find('input[name="minPrice"]').val());
+			var maxPrice = $.trim($(this).find('input[name="maxPrice"]').val());
+			var area = $.trim($(this).find('input[name="area"]').val());
+			var num = $.trim($(this).find('input[name="num"]').val());
+			var indexPrefix = 'task.plans[' + j + ']';
+			paramMap[indexPrefix + '.type'] = "KEY";
+			paramMap[indexPrefix + '.keyword'] = words;
+			paramMap[indexPrefix + '.orderSort'] = orderSort;
+			paramMap[indexPrefix + '.minPrice'] = minPrice;
+			paramMap[indexPrefix + '.maxPrice'] = maxPrice;
+			paramMap[indexPrefix + '.num'] = num;
+			paramMap[indexPrefix + '.area'] = area;
+			j++;
+		}
+	});
+	var img="";
+	if($("#picupload1").val()!=""&&$("#picupload1").val()!=null){
+		img+=$("#picupload1").val()+",";
+	}
+	if($("#picupload2").val()!=""&&$("#picupload2").val()!=null){
+		img+=$("#picupload2").val()+",";
+	}
+	if($("#picupload3").val()!=""&&$("#picupload3").val()!=null){
+		img+=$("#picupload3").val()+",";
+	}
+	if(img!=""){
+		wordPlanBoxesNum = [];
+		$.merge(wordPlanBoxesNum, $('#subwayPancel .sec.keyword'));
+		$(wordPlanBoxesNum).each(function(n) {
+			var words = $.trim($(this).find('input[name="keyword"]').val());
+			if(words!=null&&words!=""){
+				var orderSort = $.trim($(this).find('select[name="orderSort"]').val());
+				var minPrice = $.trim($(this).find('input[name="minPrice"]').val());
+				var maxPrice = $.trim($(this).find('input[name="maxPrice"]').val());
+				var area = $.trim($(this).find('input[name="area"]').val());
+				var num = $.trim($(this).find('input[name="num"]').val());
+				
+				var indexPrefix = 'task.plans[' + j + ']';
+				paramMap[indexPrefix + '.type'] = "SUBWAY";
+				paramMap[indexPrefix + '.keyword'] = words;
+				paramMap[indexPrefix + '.orderSort'] = orderSort;
+				paramMap[indexPrefix + '.minPrice'] = minPrice;
+				paramMap[indexPrefix + '.maxPrice'] = maxPrice;
+				paramMap[indexPrefix + '.num'] = num;
+				paramMap[indexPrefix + '.area'] = area;
+				paramMap[indexPrefix + '.img'] = img;
+				j++;
+			}
+		});
+	}
+	
+	
+	var tkl=$("#tklPancel").find("input[name='tkl']").val();
+	var tklNum=$("#tklPancel").find("input[name='num']").val();
+	if(tkl!=null&&tkl!=""&&tklNum!=""&&parseInt(tklNum)>0){
+		var indexPrefix = 'task.plans[' + j + ']';
+		paramMap[indexPrefix + '.type'] = "TKL";
+		paramMap[indexPrefix + '.path'] = tkl;
+		paramMap[indexPrefix + '.num'] = tklNum;
+		j++;
+	}
+	
+	var link=$("#linkPancel").find("input[name='link']").val();
+	var linkNum=$("#linkPancel").find("input[name='num']").val();
+	if(link!=null&&link!=""&&linkNum!=""&&parseInt(linkNum)>0){
+		var indexPrefix = 'task.plans[' + j + ']';
+		paramMap[indexPrefix + '.type'] = "LINK";
+		paramMap[indexPrefix + '.path'] = link;
+		paramMap[indexPrefix + '.num'] = linkNum;
+		j++;
+	}
+	
+	var ewm=$("#picupload4").val();
+	var ewmNum=$("#ewmPancel").find("input[name='num']").val();
+	if(ewm!=null&&ewm!=""&&ewmNum!=""&&parseInt(ewmNum)>0){
+		var indexPrefix = 'task.plans[' + j + ']';
+		paramMap[indexPrefix + '.type'] = "EWM";
+		paramMap[indexPrefix + '.path'] = ewm;
+		paramMap[indexPrefix + '.num'] = ewmNum;
+		j++;
+	}
+}
+function buyerAccountCheck(){
+	$(".buyerAccountCheck").each(function(){
+		var buyerAccountNick=$(this).attr("data-nick");
+		var buyerAccountId=$(this).attr("data-uid");
+		var index=CDT.buyerAccountNick.indexOf(buyerAccountNick);
+		if($(this).is(":checked")){
+			if(index<0){
+				CDT.buyerAccountNick.push(buyerAccountNick);
+				CDT.buyerAccountId.push(buyerAccountId);
+			}
+		}else{
+			CDT.buyerAccountNick.remove(buyerAccountNick);
+			CDT.buyerAccountId.remove(buyerAccountId);
+		}
+		
+		$("#sdPreAccount").text(CDT.buyerAccountNick.join(","));
+		$("#sdPreAccount").attr("data-value",CDT.buyerAccountId.join(","));
+	});
+}
+Array.prototype.remove = function(val) {
+	var index = this.indexOf(val);
+	if (index > -1) {
+	this.splice(index, 1);
+		}
+	};
+
+
+$(function() {
+	initBase();
+	CDT.buyerAccountTempl = $('#buyerAccountTempl').remove().val();
+	Mustache.parse(CDT.buyerAccountTempl);
+	CDT.keywordTempl = $('#keywordTempl').remove().val();
+	Mustache.parse(CDT.keywordTempl);
+	calculate();
+	getNum();
+	$("#txtItemUrl").blur(
+			function() {
+				var platform = $('.platform.selectedCtb').attr('value');
+				var url = $("#txtItemUrl").val();
+				if ("TAOBAO" == platform) {
+					if (url != ""
+							&& (url.indexOf("taobao") < 0 && url
+									.indexOf("tmall") < 0)) {
+						alert("商品地址和所选平台不匹配！");
+						$("#txtItemUrl").val("");
+					}
+				}
+	});
+	//获取商品图片
+	Tr.post('/publish/app/getItemPic', {
+		itemUrl:$("#itemUrl").val(),
+		id:$("#taskId").val()
+	}, function(data) {
+		if (data.code == -1) {
+			return ;
+		}
+		if (data.code != 200) {
+			return alert(data.msg);
+		}
+		$("#upload5_no img").attr("src",data.results);
+		$("#picupload5").val(data.results);
+	});
+	$("#search_account").click(function(){
+		$('#accountContainer').html("");
+		loadAccount(1);
+	});
+	
+	$("#search_account_shop").click(function(){
+		CDT.type=1;
+		$('#accountContainer').html("");
+		loadAccount(1);
+	});
+	
+	$("#search_account_nick").click(function(){
+		CDT.type=2;
+		$('#accountContainer').html("");
+		loadAccount(1);
+	});
+	$(document).on("change" ,".taoqizhiLimit",function(){
+		calculate();
+	});
+	$("#sdtxtItemPrice").blur(function(){
+		calculate();
+	});
+	$("#itemBuyNum").blur(function(){
+		calculate();
+	});
+	$("#sdTotalCount").blur(function(){
+		calculate();
+	});
+	$("#extraReward").change(function(){
+		calculate();
+	});
+	$(document).on("click" ,".sdChat",function(){
+		$(".sdChat").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		if($(this).attr("data-value")=="true"){
+			$("#chatPriceTip").show();
+		}else{
+			$("#chatPriceTip").hide();
+		}
+		calculate();
+	});
+	
+	if($(".avgPublish.selectedCtb").attr("data-value")=="true"){
+		$("#fastTitle").show();
+		$("#avgTitle").hide();
+		$("#setTime").hide();
+	}else{
+		$("#fastTitle").hide();
+		$("#avgTitle").show();
+		$("#setTime").show();
+	}
+	
+	if($(".expressType.selectedCtb").attr("data-value")=="SELLERKD"){
+		$("#expressWight").hide();
+		$("#expressTitle").hide();
+	}else{
+		$("#expressWight").show();
+		$("#expressTitle").show();
+	}
+	if($(".sdChat.selectedCtb").attr("data-value")=="true"){
+		$("#chatPriceTip").show();
+	}else{
+		$("#chatPriceTip").hide();
+	}
+	
+	if($(".huobi.selectedCtb").attr("data-value")=="true"){
+		$("#huobiPriceTip").show();
+	}else{
+		$("#huobiPriceTip").hide();
+	}
+	$(document).on("blur" ,".num",function(){
+		getNum();
+	});
+	
+	$(document).on("click" ,".huobi",function(){
+		$(".huobi").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		if($(this).attr("data-value")=="true"){
+			$("#huobiPriceTip").show();
+		}else{
+			$("#huobiPriceTip").hide();
+		}
+		calculate(); 
+	});
+	$(document).on("click" ,".avgPublish",function(){
+		$(".avgPublish").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		if($(this).attr("data-value")=="true"){
+			$("#fastTitle").show();
+			$("#avgTitle").hide();
+			$("#setTime").hide();
+		}else{
+			$("#fastTitle").hide();
+			$("#avgTitle").show();
+			$("#setTime").show();
+		}
+	});
+	
+	$(document).on("click" ,".comment",function(){
+		$("#d-commonTip").html($(this).attr("data-say"));
+		$(".comment").removeClass("selectedCtb");
+		$(this).addClass("selectedCtb");
+		
+	});
+	//点击性别变化颜色
+	$(document).on("click" ,".gender",function(){
+		$(".gender").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		
+		calculate();
+	});
+	$(document).on("click" ,".ageLimit",function(){
+		if($(this).hasClass("selectedCtb")){
+			$(this).removeClass("selectedCtb");
+		}else{
+			if($(".ageLimit.selectedCtb").length>=4&&$(this).text()!="不限"){
+				 alert("最多选这4项");
+			}else{
+				$(this).addClass("selectedCtb");
+			}
+		}
+		if($(this).text()!="不限"){
+			$(".ageLimit").first().removeClass("selectedCtb");
+		}else{
+			$(".ageLimit").removeClass("selectedCtb");
+			$(this).addClass("selectedCtb");
+		}
+		calculate();
+	});
+	
+	$(document).on("click" ,".commdityType",function(){
+		if($(this).hasClass("selectedCtb")){
+			$(this).removeClass("selectedCtb");
+		}else{
+			if($(".commdityType.selectedCtb").length>=4&&$(this).text()!="不限"){
+				 alert("最多选这4项");
+			}else{
+				$(this).addClass("selectedCtb");
+			}
+		}
+		if($(this).text()!="不限"){
+			$(".commdityType").first().removeClass("selectedCtb");
+		}else{
+			$(".commdityType").removeClass("selectedCtb");
+			$(this).addClass("selectedCtb");
+		}
+		calculate();
+	});
+	$(document).on("click" ,".timeCancel",function(){
+		$(".timeCancel").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+	});
+	$("#creditLimit").change(function(){
+		calculate();
+	});
+	$(document).on("click" ,".huabeiAccount",function(){
+		$(".huabeiAccount").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		
+		calculate();
+	});
+	
+	$(document).on("click" ,".buyerAccountCheck",function(){
+		buyerAccountCheck();
+	});
+	$("#itemUrl").on("change",function(){
+		Tr.post('/publish/app/getItemPic', {
+			itemUrl:$("#itemUrl").val(),
+			id:$("#taskId").val()
+		}, function(data) {
+			if (data.code != 200) {
+				return alert(data.msg);
+			}
+			$("#upload5_no img").attr("src",data.results);
+			$("#picupload5").val(data.results);
+		});
+	});
+	$(document).on("click" ,".expressType",function(){
+		$(".expressType").removeClass("selectedCtb")
+		$(this).addClass("selectedCtb");
+		if($(this).attr("data-value")=="SELLERKD"){
+			$("#expressWight").hide();
+			$("#expressTitle").hide();
+		}else{
+			$("#expressWight").show();
+			$("#expressTitle").show();
+		}
+		calculate();
+	});
+	$(document).on("click",".inputCheckBox",function(){
+		if($(this).hasClass('inputCheckBox-checked')){
+			$(this).removeClass('inputCheckBox-checked');
+			$(this).attr("data-value",false);
+		}else{
+			$(this).addClass('inputCheckBox-checked');
+			$(this).attr("data-value",true);
+		}
+		
+	});
+	$(document).on("click",".keyClose",function(){
+		$(this).parent().remove();
+	});
+	$('.inputDate').datePicker({
+		startDate : '2014-01-01',
+		endDate : '2018-12-30',
+		clickInput : true,
+		verticalOffset : 35
+	});
+	$(document).on(
+			'click',
+			'.chargeTypeTab',
+			function() {
+				var id_toshow = $(this).addClass('focus').siblings()
+						.removeClass('focus').end().attr('for');
+				$('.charge-type-panel').hide();
+				$('#' + id_toshow).show();
+			});
+	
+	$(document).on("click" ,".plusBlockBtn",function(){
+		var output = Mustache.render(CDT.keywordTempl);
+		if($(this).parent().find(".sec .keyword").length>=10){
+			return alert("关键词个数不能超过10个");
+		}
+		$(this).parent().find(".panelKeyWord").last().append(output);
+	});
+});

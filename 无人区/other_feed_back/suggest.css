@@ -1,0 +1,116 @@
+
+/*网银弹窗*/
+.bankPayment .modalWnd{
+	width:650px;
+	left:50%;
+	top:50%;
+	margin:-150px 0 0 -325px;
+	position: fixed;
+	z-index: 100;
+}
+.btnConfirmSave{
+	background-color: #26AA9F;
+	width: 20%;
+	text-align: center;
+}
+.btnConfirmSave:hover{
+	background-color: #2BBFB3;
+}
+.return{
+	line-height:32px
+}
+.contentBody{
+	min-height:200px;
+	max-height: auto;
+}
+.panelLine span{
+	text-align: right;
+}
+.txtmodifyMsg{
+	width: 300px;
+}
+#modifyAccountWnd .modalWnd{
+	width:650px;
+	left:50%;
+	top:50%;
+	margin:-150px 0 0 -325px;
+	position: fixed;
+	z-index: 100;
+}
+
+
+
+
+.adviceItem{
+	width: 40%; float: left;
+}
+.mesArea{
+	width: 300px; padding: 5px; border-radius: 2px;
+	margin-left: 56px; height: 120px; margin-top: -26px;
+}
+.advicePic{
+	position: relative;
+	margin-left: 70px; width: 120px; height: 120px; background:#fef6e7; border: 1px solid #ABADB3; 
+}
+.ouploadBtn{
+	height: 30px; line-height: 30px; text-align: center; border-radius: 2px;
+	width: 80px; border: 1px solid #ccc; color: #ccc;
+	 position: absolute; left: 50%; top: 50%;margin-left: -40px; margin-top: -20px; cursor: pointer;
+}
+.uploadImg{
+	position: absolute; left: 0; top: 0; width: 132px; height: 132px; 
+	display: none; background: #ABADB3;
+}
+.deleteImg{
+	font-size: 12px; font-weight:100px; 
+	width: 20px; height: 20px; margin: 0; line-height: 20px; text-align: center;
+	padding: 0;  display: none;
+	position: absolute; top: 0; right: 0; cursor: pointer; transform: scale(0.8);
+}
+.deleteImg:hover{
+	color:#E13D55;
+}
+.adviceSubmit{
+	margin-left: 55px;
+}
+.normTable th{
+	line-height: 40px; font-size: 14px; color: #333; text-align: left; padding-left: 20px;
+}
+.normTable td{
+	padding-left: 20px; text-align: left;
+}
+.suggestAll{
+	font-size: 16px;
+}
+.suggestAll .suggestItem{
+	  overflow:hidden ; padding: 20px; border-bottom: solid 1px #eee;
+	  position: relative;
+	 
+}
+.suggestQue{
+	font-size: 14px; color: #666;  line-height: 24px;
+}
+.suggestRes{
+	font-size: 14px; color: #999; line-height: 24px; 
+	margin-top: 20px; 
+}
+.suggestImg{
+	font-size: 14px; color: #f46c00; margin-left: 10px;
+	white-space: nowrap;
+}
+.suggestTime{
+	position: absolute;right:0; top: 0; line-height: 30px; font-size: 14px;
+	right: 208px;color: #999999;
+}
+.customerBack{
+	color: #f46c00; font-size: 14px;
+}
+.state{
+	position: absolute;right: 60px; top: 0; font-size:14px ; line-height: 30px;
+}
+.dealState{
+	color: #999999;
+}
+.unstate{
+	color: #ff5757;
+}

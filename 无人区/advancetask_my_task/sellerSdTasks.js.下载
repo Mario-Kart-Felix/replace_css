@@ -1,0 +1,254 @@
+CDT = {
+	searchType:"PUBLISHED",
+	taskCellTemp: null,
+	currPageNo: 1,
+	pageSize: 10,
+	currId:''
+};
+//加载任务
+function loadTask(pageNo) {
+	var publishTimeStart = ($.trim($('#publishTimeStart').val())) ? $.trim($('#publishTimeStart').val()) + ' 00:00:00' : '',
+	    publishTimeEnd = ($.trim($('#publishTimeEnd').val())) ? $.trim($('#publishTimeEnd').val()) + ' 00:00:00' : '',
+	    shopName=$("#shopName").val();
+	Tr.get('/user/sdTask/listSellerSdTasks', {
+		'vo.shopId':shopName,
+		'vo.id':$("#taskId").val(),
+		'vo.status': CDT.searchType,
+		'vo.publishTimeStart': publishTimeStart,
+		'vo.publishTimeEnd': publishTimeEnd,
+		'vo.pageNo': pageNo,
+		'vo.pageSize': CDT.pageSize
+	}, function(data) {
+		if (data.code != 200) return;
+		if (data.results.length <= 0) {
+			$('.taskWrapper').addClass('warnBox').html('<span class="iconfont">&#xf00b6;</span>没有任务!');
+			$('.pagination').empty();
+			return;
+		}
+
+		var output = Mustache.render(CDT.taskCellTemp,data,$.extend(data,{
+			createTimeStr: function(){
+				return new Date(this.createTime).Format('yyyy-MM-dd hh:mm');
+			},itemPriceStr: function() {
+				return this.itemPrice == null? '':$.number(this.itemPrice/100,2);
+			},pledgeStr: function() {
+				return this.pledge == null? '':$.number(this.pledge/100,2);
+			},chatStr: function() {
+				if(this.chat=='0'){
+					return "否";
+				}
+				if(this.chat=='1'){
+					return "是";
+				}
+			},expressTypeStr: function() {
+				if(this.expressType=='SELLERKD'){
+					return "商家快递";
+				}
+				if(this.expressType=='YDKD'){
+					return "韵达快递";
+				}
+				if(this.expressType=='YTKD'){
+					return "圆通快递";
+				}
+				if(this.expressType=='TTKD'){
+					return "天天快递";
+				}
+				if(this.expressType=='STKD'){
+					return "申通快递";
+				}
+				if(this.expressType=='ZTKD'){
+					return "中通快递";
+				}
+			},statusTitle: function(){
+				if(this.status=='WAIT_PUBLISH'){
+					return "待发布";
+				}
+				if(this.status=='FINISHED'){
+					return "已完成";
+				}
+				if(this.status=='CANCEL'){
+					return "已取消";
+				}
+				if(this.status=='PUBLISHED'){
+					return "已发布";
+				}
+				if(this.status=='WAIT_PAY'){
+					return "待支付";
+				}
+			},publishTimeStr: function(){
+				return new Date(this.publishTime).Format('yyyy-MM-dd hh:mm');
+			},daysDianfu: function(){
+				if(this.sdType=="DIANFU"){
+					return true;
+				}
+				return false;
+			},sdTypeTitle: function(){
+				if(this.sdType=='DIANFU'){
+					return "补单任务";
+				}
+				if(this.sdType=='THIRD_DAY_BUY'){
+					return "第三日购";
+				}
+				if(this.sdType=='FOURTH_DAY_BUY'){
+					return "第四日购";
+				}
+				if(this.sdType=='SECOND_DAY_BUY'){
+					return "次日购";
+				}
+				if(this.sdType=='FIRST_DAY_BUY'){
+					return "当日购";
+				}
+			},waitPay: function(){
+				if(this.status=='WAIT_PAY'){
+					return true;
+				}
+				return false;
+			}
+		}));
+		$('#taskContainer').removeClass('warnBox').html(output);
+		$('.WAIT_EDIT,.WAITING_PAY').parents('.taskCell').addClass('newtaskCell');
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadTaskCallBack,
+			callback_run: false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function loadTaskCallBack(index, jq) {
+    loadTask(index + 1);
+}
+
+
+function initBase(){
+	//查询
+	$('#queryBtn').click(function(){
+		loadTask(1);
+	});
+    $('.inputDate').datePicker({
+		startDate: '2014-01-01',
+		endDate: '2020-01-01',
+		clickInput: true,
+		verticalOffset: 35
+	});
+	// 撤销未接单任务
+	$(document).on('click', '.cancel', function() {
+		CDT.currId = $(this).attr('data-taskId');
+		Tr.get('/user/sdsub/cancelSDTaskData', {
+			id: CDT.currId
+		}, function(data) {
+			if (data.code == 8001) {
+				alert('该任务已经全部被接单');
+			}
+			if (data.code != 200) return alert(data.msg);
+			if(!data.results){
+				$('#cancelWnd .cancledNum').text(0);
+				$('#cancelWnd .cancledPledge').text(0);
+			    $('#cancelWnd .cancledIngot').text(0);
+			    Tr.popup('cancelWnd');
+			}
+			else{	
+				$('#cancelWnd .cancledNum').text(data.results.cancledNum);
+				$('#cancelWnd .cancledPledge').text($.number(data.results.cancledPledge / 100, 2));
+			    $('#cancelWnd .cancledIngot').text($.number(data.results.cancledIngot / 100, 2));
+			    Tr.popup('cancelWnd');
+			}
+			
+		});
+	});
+
+	// 确认撤销任务
+	$(document).on('click', '#cancelWnd .btnPay', function() {
+		Tr.get('/app/sdsub/cancelSDTask', {
+			taskId: CDT.currId
+		}, function(data) {
+			if (data.code == 800101) {
+				alert('该功能维护中，暂不开放！');
+			}
+			if (data.code == 8001) {
+				alert('该任务已经全部被接单');
+			}
+			if (data.code != 200) {
+				$('#cancelWnd').hide();
+				return alert(data.msg);
+			}
+			$('#cancelWnd').hide();
+			alert('撤销成功');
+			loadTask(1);
+		});
+	});
+
+	$(document).on('click', '.delTask', function() {
+		if(!confirm("您确认删除该任务吗？")){
+			return false;
+		}
+		Tr.post('/seller/sdTask/delTask', {
+			taskId: $(this).attr("data-taskId")
+		}, function(data) {
+			if (data.code != 200) {
+				return alert(data.msg);
+			}
+			alert('删除成功');
+			loadTask(1);
+		});
+	});
+	
+	$(document).on('click', '.payTask', function() {
+		var pledge=$(this).attr("data-pledge");
+		if(!confirm("您确认支付"+pledge+"押金吗？")){
+			return false;
+		}
+		Tr.post('/seller/sdTask/payTask', {
+			taskId: $(this).attr("data-taskId")
+		}, function(data) {
+			if (data.code != 200) {
+				return alert(data.msg);
+			}
+			alert('支付成功');
+			loadTask(1);
+		});
+	});
+
+	
+	$(document).on('click', '.chargeTypeTab', function() {
+		var id_toshow = $(this).addClass('focus').siblings().removeClass('focus').end().attr('for');
+		CDT.searchType=$(this).attr("data-status");
+		if(CDT.searchType=='FINISHED'||CDT.searchType=='CANCEL'){
+			$("#status").attr("disabled",true);
+		}else{
+			$("select[id='status'] option").each(function(){
+				if($(this).val()=='FINISHED'||$(this).val()=='CANCLED'){
+					$(this).show();
+				}
+			});
+			$("#status").attr("disabled",false);
+		}
+		loadTask(1);
+	});
+
+}
+
+$(function(){
+	CDT.taskCellTemp = $('#taskCellTemp').remove().val();
+	Mustache.parse(CDT.taskCellTemp);
+	$("select[id='status'] option").each(function(){
+		if($(this).val()=='FINISHED'||$(this).val()=='CANCLED'){
+			$(this).hide();
+		}
+	});
+	initBase();
+	loadTask(1);
+});
+//选中
+$(function(){
+
+	$('input[type="checkbox"]').click(function(){
+		$('input[type="radio"]').removeAttr('checked');
+		$('.pay').removeClass('selectedCtb');
+	});
+	
+});

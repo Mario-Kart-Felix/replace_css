@@ -1,0 +1,159 @@
+var CDT = {
+	taskCellTemp : null,
+	currPageNo : 1,
+	pageSize : 10,
+	taskId:null,
+	status:"WAIT_EXAMINE"
+};
+
+function loadAccount(pageNo) {
+	Tr.get('/app/buyer/listQuestionTask', {
+		'vo.pageNo' : pageNo,
+		'vo.type' : 'COMMENT',
+		'vo.sdTaskId': $("#taskId").val(),
+		'vo.id': $("#subId").val(),
+		'vo.buyerNick': $("#buyerNick").val(),
+		'vo.buyerAccountNick': $("#buyerAccountNick").val(),
+		'vo.pageSize' : CDT.pageSize,
+		'vo.status':CDT.status
+	}, function(data) {
+		if (data.code != 200) {
+			return alert(data.msg);
+		}
+		if (data.results.length <= 0) {
+			$('#taskContainer').hide();
+			$('#noMsg').show();
+			$("#textAccountTip").text("没有任务");
+			$('.pagin-btm').hide();
+			return;
+		}
+		var output = Mustache.render(CDT.taskCellTemp, $.extend(data, {
+			
+			itemPriceStr : function() {
+				return $.number(this.itemPrice / 100, 2);
+			},
+			modifyTimeStr : function() {
+				if (this.modifyTime) {
+					return new Date(this.updateTime)
+							.Format('yyyy-MM-dd hh:mm:ss');
+				}
+				return '----';
+			},
+			takeTimeStr : function() {
+				if (this.takeTime == null) {
+					return "-----";
+				}
+				return new Date(this.takeTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			createTimeStr : function() {
+				if (this.createTime == null) {
+					return "-----";
+				}
+				return new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			showBtn : function() {
+				if (this.status == "WAIT_EXAMINE") {
+					return true;
+				}
+				return false;
+			}
+		}));
+
+		$('#taskContainer').show();
+		$('#noMsg').hide();
+		$('.pagin-btm').show();
+		$('#taskContainer').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page : CDT.pageSize,
+			num_display_entries : 5,
+			current_page : pageNo,
+			num_edge_entries : 2,
+			callback : loadAccountCallBack,
+			callback_run : false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+function loadAccountCallBack(index, jq) {
+	loadAccount(index + 1);
+
+}
+function initBase() {
+	$(document).on('click', '.fundTab', function() {
+		var $me = $(this);
+		$me.addClass('focus').siblings().removeClass('focus');
+		CDT.status = $me.attr('data-status');
+		loadAccount(1);
+	});
+	$(document).on('click', '.examinePass', function() {
+		var id = $(this).attr("data-id");
+		Tr.post('/seller/sellerExaminePass', {
+			id:id
+		}, function(data) {
+			if (data.code != 200) {
+				return alert(data.msg);
+			}
+			alert("审核成功");
+			loadAccount(CDT.currPageNo);
+		});
+	});
+	
+	$(document).on('click','.examineNoPass',function(){
+		CDT.taskId=$(this).attr("data-id");
+		Tr.popup('appealWnd');
+
+	});
+	$("#allPass").click(function(){
+		Tr.post('/seller/sellerExaminePassAll', {
+			"type":'COMMENT'
+		}, function(data) {
+			if (data.code != 200) {
+				alert(data.msg);
+				return ;
+			}
+			alert("审核成功!");
+			loadAccount(CDT.currPageNo);
+		});
+	});
+	$("#btnModifyAppeal").click(function(){
+		Tr.post('/seller/sellerExamineAppeal', {
+			'id':CDT.taskId,
+			'memo':$("#appeal_memo").val()
+		}, function(data) {
+			if (data.code != 200) {
+				alert(data.msg);
+				$("#appealWnd").hide();
+				return ;
+			}
+			$("#appealWnd").hide();
+			alert("申诉成功!");
+			loadAccount(CDT.currPageNo);
+		});
+	});
+	
+	
+	$("#allUpdate").click(function(){
+		Tr.post('/seller/sdsubTask/passGoodComment', {
+			id:0,
+			pass:"pass"
+		}, function(data) {
+			if (data.code != 200) {
+				return alert(data.msg);
+			}
+			
+			alert("审核成功");
+			loadAccount(CDT.currPageNo);
+		});
+	});
+	
+	$("#queryBtn").click(function(){
+		loadAccount(1);
+	});
+}
+
+$(function() {
+	initBase();
+	CDT.taskCellTemp = $('#taskCellTemp').remove().val();
+	Mustache.parse(CDT.taskCellTemp);
+	loadAccount(1);
+});

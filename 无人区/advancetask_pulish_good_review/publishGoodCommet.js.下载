@@ -1,0 +1,164 @@
+var CDT = {
+		taskCellTemp: null,
+		currPageNo:1,
+		pageSize:5,
+		status:"WAIT_PUBLISH"
+};
+
+function loadAccount(pageNo) {
+	var publishTimeStart = ($.trim($('#publishTimeStart').val())) ? $.trim($('#publishTimeStart').val()) + ' 00:00:00' : '',
+		    publishTimeEnd = ($.trim($('#publishTimeEnd').val())) ? $.trim($('#publishTimeEnd').val()) + ' 00:00:00' : '';
+	Tr.get('/seller/sdsubTask/listGoodComment', {
+		'vo.pageNo': pageNo,
+		'vo.shopId': $("#shopName").val(),
+		'vo.id': $("#taskId").val(),
+		'vo.pageSize': CDT.pageSize,
+		'status':CDT.status,
+		'vo.updateTimeStart': publishTimeStart,
+		'vo.updateTimeEnd': publishTimeEnd
+	}, function(data) {
+		if (data.code != 200) {
+			return alert(data.msg);
+		}
+		if (data.results.length <= 0) {
+			$('#taskContainer').hide();
+			$('#noMsg').show();
+			$("#textAccountTip").text("没有任务");
+			$('.pagin-btm').hide();
+			return;
+		}
+		var output = Mustache.render(CDT.taskCellTemp, $.extend(data, {
+			ingotStr : function() {
+				return $.number(this.ingot / 100, 2);
+			},
+			paidFeeStr : function() {
+				return $.number(this.paidFee / 100, 2);
+			},postageStr : function() {
+				return $.number(this.postage / 100, 2);
+			},
+			itemPriceStr : function() {
+				return $.number(this.itemPrice / 100, 2);
+			},
+			modifyTimeStr : function() {
+				if (this.modifyTime) {
+					return new Date(this.updateTime)
+							.Format('yyyy-MM-dd hh:mm:ss');
+				}
+				return '----';
+			},
+			takeTimeStr : function() {
+				if (this.takeTime == null) {
+					return "-----";
+				}
+				return new Date(this.takeTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			createTimeStr : function() {
+				if (this.createTime == null) {
+					return "-----";
+				}
+				return new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			statusStr : function() {
+				if (this.status == "FINISHED") {
+					return "已完成";
+				}
+				if (this.status == "CANCEL") {
+					return "已取消";
+				}
+				if (this.status == "PUBLISHED") {
+					return "已发布，待接手";
+				}
+				if (this.status == "WAIT_EXAMINE") {
+					return "待审核";
+				}
+				if (this.status == "WAIT_PAY") {
+					return "待支付";
+				}
+				if (this.status == "WAIT_SEND_GOODS") {
+					return "待发货";
+				}
+				if (this.status == "WAIT_WIDTHDRAW") {
+					return "待提现";
+				}
+				if (this.status == "WAIT_COMMENT") {
+					return "待好评";
+				}
+				if (this.status == "NOPASS") {
+					return "审核不通过";
+				}
+
+			},showBtn:function(){
+				if (this.goodCommentWords == null&&this.goodCommentImgs == null) {
+					return true;
+				}else{
+					return false;
+				}
+			}
+		}));
+		
+		$('#taskContainer').show();
+		$('#noMsg').hide();
+		$('.pagin-btm').show();
+		$('#taskContainer').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadAccountCallBack,
+			callback_run: false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+function loadAccountCallBack(index, jq) {
+	loadAccount(index + 1);
+	
+}
+function initBase(){
+	$('.inputDate').datePicker({
+		startDate:'2014-01-01',
+		endDate: '2020-12-30',
+		clickInput: true,
+		verticalOffset: 35
+	});
+		
+	$(document).on('click', '.fundTab', function() {
+		var $me = $(this);
+		$me.addClass('focus').siblings().removeClass('focus');
+		CDT.status = $me.attr('status');
+		loadAccount(1);
+	});
+	
+	$(document).on('click', '#queryBtn', function() {
+		
+		loadAccount(1);
+	});
+
+	$(document).on('click', '.btnCancel', function() {
+		if(!confirm("确定要撤销该评论任务吗？")){
+			return false;
+		}
+		var id = $(this).attr("data-id");
+		Tr.post("/seller/sdsubTask/cancelComment",{
+			"taskId":id
+		},function(data){
+			if(data.code==200){
+				return alert("撤销成功！"),loadAccount(CDT.currPageNo);
+			}
+			if(data.msg){
+				return alert(data.msg);
+			}
+		});
+	});
+
+	
+}
+
+
+$(function() {
+	initBase();
+	CDT.taskCellTemp = $('#taskCellTemp').remove().val();
+	Mustache.parse(CDT.taskCellTemp);
+	loadAccount(1);
+});

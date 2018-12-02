@@ -1,0 +1,213 @@
+.btnInfoEdit {
+	cursor: pointer;
+	font-size: 14px;
+}
+
+.btnInfoEdit:hover {
+	color: #AD6BAE;
+}
+
+#personalInfoPanel .num {
+	line-height: 24px;
+	color: #596678;
+}
+
+.announceList {}
+
+.panelLine {
+	height: 35px;
+	line-height: 35px;
+}
+
+.announceList li {
+	line-height: 35px;
+}
+
+.announceCell .title {
+	color: #555;
+}
+
+.announceCell .title:hover {
+	color: #0F9EE2;
+	text-decoration: underline;
+}
+
+.announceCell .date {
+	float: right;
+}
+
+
+/*---------------------------*/
+
+#taskFilterPanel {
+	height: 34px;
+	padding-left: 10px;
+}
+
+#taskFilterPanel .sp {
+	margin-right: 8px;
+}
+
+#taskFilterPanel .stdColorButton {
+	line-height: 14px;
+}
+
+.mb10 input {
+	background-color: #f46c00;
+	color: white;
+	border: none;
+	border-radius: 2px;
+}
+
+.mb20 input {
+	background-color: #f46c00;
+	color: white;
+	border: none;
+	border-radius: 2px;
+}
+
+.taskWrapper {}
+
+.taskCell {
+	border-top: solid 1px #DEDEDE;
+	border-bottom: solid 1px #DEDEDE;
+}
+
+.taskCell:hover {
+	background-color: #fefce8;
+}
+
+.taskCell .title {
+	height: 40px;
+	line-height: 40px;
+	padding: 0 10px;
+}
+
+.taskCell .shop {
+	float: left;
+	color: #111;
+}
+
+.taskCell .taskNo {
+	float: right;
+}
+
+.taskCell .body {
+	padding: 10px;
+}
+
+.taskCell .body td {
+	color: #B0B0B0;
+}
+
+.taskCell .body tbody td {}
+
+.taskCell .body .pic {
+	width: 80px;
+}
+
+.taskCell .body .pic img {
+	width: 80px;
+	height: 80px;
+	border: solid 1px #DEDEDE;
+}
+
+.taskCell .body .name {
+	text-align: left;
+	color: #5d5d5d;
+	font-weight: 700;
+}
+
+.taskCell .body tbody .name {
+	line-height: 24px;
+	color: #3388BB;
+}
+
+.taskCell .body .nick {
+	width: 150px;
+	vertical-align: middle;
+}
+
+.taskCell .body .price {
+	width: 100px;
+	color: #B77E5E;
+	vertical-align: middle;
+}
+
+.taskCell .body .commission {
+	width: 100px;
+	color: #B77E5E;
+	vertical-align: middle;
+}
+
+.taskCell .body .status {
+	width: 200px;
+	vertical-align: middle;
+}
+
+#modifyForm label {
+	width: 84px;
+}
+
+#modifyForm{
+	margin-top: -120px;;
+}
+/* 头像圆形设置 */
+
+.imgtest {
+	margin: 10px 5px;
+	/*width: 200px;
+	height: 100px;
+	background: blue;
+	float: right;
+	margin-top: 150px;*/
+	overflow: hidden;
+}
+
+.list_ul figcaption p {
+	font-size: 12px;
+	color: #aaa;
+}
+
+.imgtest figure div {
+	display: inline-block;
+	margin: 5px auto;
+	width: 100px;
+	height: 100px;
+	border-radius: 100px;
+	border: 2px solid #fff;
+	overflow: hidden;
+	-webkit-box-shadow: 0 0 3px #ccc;
+	box-shadow: 0 0 3px #ccc;
+}
+
+.imgtest img {
+	width: 100%;
+	min-height: 100%;
+	text-align: center;
+}
+.invite{
+	color:white ;
+	background: #F46C00;
+	font-size: 16px;
+}
+
+.xufei a:hover{
+	background: white;
+	color: peru;
+}
+.user-btn{
+	color: white;
+    //border: 1px solid #ccc; 
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 6px;
+    padding-right: 6px;
+    background: #52B6F2;
+}
+
+.captcha input{
+	color: #404148;
+	background: #F3F3F3;
+	border: 1px solid #949494;
+}

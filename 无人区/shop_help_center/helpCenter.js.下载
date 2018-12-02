@@ -1,0 +1,28 @@
+CDT = {
+	helpCenterTpl: ''
+};
+function loadPage() {
+	Tr.get('/notice/list', {
+		's.pageNo': 1,
+		's.type':'COURSE'
+	}, function(data) {
+		if (data.code != 200) return;
+		if (data.results.length <= 0) {
+			$('#helpCenterBox').addClass('warnBox').html('<span class="iconfont">&#xf00b6;</span>没有公告!');
+			return;
+		}
+		var output = Mustache.render(CDT.helpCenterTpl, $.extend(data, {
+			createtime: function() {
+				return new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			}
+		}));
+		$('#helpCenterBox').removeClass('warnBox').html(output);
+	});
+}
+
+$(function() {
+	CDT.helpCenterTpl = $('#helpCenterTpl').remove().val();
+	Mustache.parse(CDT.helpCenterTpl);
+
+	loadPage();
+});

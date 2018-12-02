@@ -1,0 +1,88 @@
+CDT = {
+	taskRowTempl: null,
+	currPageNo:1,
+	pageSize:15
+};
+function loadTask(pageNo) {
+	
+	Tr.get('/seller/listBlackList', {
+		'vo.pageNo': pageNo,
+		'vo.pageSize': CDT.pageSize,
+		'vo.buyerAccountNick':$("#buyerNick").val()
+	}, function(data) {
+		if (data.code != 200) return;
+		if (data.results.length <= 0) {
+			$('.taskWrapper').addClass('warnBox').html('<span class="iconfont">&#xf00b6;</span>没有买号!');
+			$('.pagination').empty();
+			return;
+		}
+
+		var output = Mustache.render(CDT.taskRowTempl,data,$.extend(data,{
+			createTimeStr: function(){
+				return new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			}
+		}));
+		$('#taskContainer').removeClass('warnBox').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadTaskCallBack,
+			callback_run: false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function loadTaskCallBack(index, jq) {
+    loadTask(index + 1);
+}
+function initBase(){
+	$(".addBlackList").click(function(){
+		$('#bindShopWnd').show();
+	});
+	$("#btnConfirmSave").click(function(){
+		var account=$("#buyerAccountNick").val();
+		var memo=$("#memo").val();
+		if(account==null||account==""){
+			return alert("买号不能为空");
+		}
+		if(memo==null||memo==""){
+			return alert("拉黑原因不能为空");
+		}
+		Tr.post('/seller/addBlackList', {
+			accountNick:account,
+			memo:memo
+		}, function(data) {
+			if (data.code != 200) return alert(data.msg);
+			alert("提交成功");
+			$("#buyerAccountNick").val("");
+			$('#bindShopWnd').hide();
+			loadTask(1);
+		});
+	});
+	
+	$(document).on('click', '.cancel', function() {
+		var id = $(this).attr("data-id");
+		Tr.post('/seller/delBlackList', {
+			id:id
+		}, function(data) {
+			if (data.code != 200) return alert(data.msg);
+			alert("撤销成功");
+			loadTask(1);
+		});
+	});
+	$("#queryBtn").click(function(){
+		loadTask(1);
+	});
+}
+
+
+
+$(function() {
+	CDT.taskRowTempl = $('#taskRowTempl').remove().val();
+	Mustache.parse(CDT.taskRowTempl);
+	initBase();
+	loadTask(1);
+});

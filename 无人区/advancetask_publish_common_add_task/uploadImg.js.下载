@@ -1,0 +1,103 @@
+var Upload_URL = "";
+if (!Upload_URL) {
+    Upload_URL = "/wap/workOrder/uploadImage";
+}
+
+function updateImg(index){
+	var $list1 = $('#upload'+index),
+    ratio = window.devicePixelRatio || 1,
+    thumbnailWidth = 100 * ratio,
+    thumbnailHeight = 100 * ratio,
+    uploader1;
+   $("#uploader"+index).click(function () {
+       $(this).parent().css("visibility", "hidden");
+       $("#" + $(this).parent().attr('id') + "_no").css("visibility", "visible");
+       $('#picupload'+index).val("");
+       $(this).next().remove();
+       uploader1.reset();
+   });
+   uploader1 = WebUploader.create({
+       fileNumLimit: 1,
+       auto: true,
+       server: '/wap/workOrder/uploadImage' ,
+       pick: '#upload'+index+'_no',
+       accept: {
+           title: 'Images',
+           extensions: 'gif,jpg,jpeg,bmp,png',
+           mimeTypes: 'image/jpg,image/jpeg,image/png'
+       }
+   });
+   // 当有文件添加进来的时候
+   uploader1.on('fileQueued', function (file) {
+       var me = this
+       var $li = $(
+               '<div id="' + file.id + '" class="file-item thumbnail">' +
+                   '<img>' +
+               '</div>'
+               ),
+           $img = $li.find('img');
+
+       $list1.append($li);
+
+       // 创建缩略图
+       uploader1.makeThumb(file, function (error, src) {
+           if (error) {
+               $img.replaceWith('<span>不能预览</span>');
+               return;
+           }
+
+           $img.attr('src', src);
+           me.options.formData = { "basepic": src };
+      }, 0.8, 0.8);
+   });
+
+   // 文件上传过程中创建进度条实时显示。
+   uploader1.on('uploadProgress', function (file, percentage) {
+       var $li = $('#' + file.id),
+        $percent = $li.find('.progress span');
+
+       //避免重复创建
+       if (!$percent.length) {
+           $percent = $('<p class="progress"><span></span></p>')
+           .appendTo($li)
+           .find('span');
+       }
+       $percent.css('width', percentage * 100 + '%');
+   });
+
+   // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+   uploader1.on('uploadSuccess', function (file, response) {
+       $('#' + file.id).addClass('upload-state-done');
+       json = eval('(' + response._raw + ')');
+       $('#picupload'+index).val(json.results);
+   });
+
+   // 文件上传失败，现实上传出错。
+   uploader1.on('uploadError', function (file) {
+       var $li = $('#' + file.id),
+           $error = $li.find('div.error');
+       // 避免重复创建
+       if (!$error.length) {
+           $error = $('<div class="error"></div>').appendTo($li);
+       }
+
+       $error.text('上传失败');
+   });
+   uploader1.on('uploadComplete', function (file) {
+       $('#' + file.id).find('.progress').remove();
+       $('#upload'+index).css("visibility", "visible");
+       $('#upload'+index+'_no').css("visibility", "hidden");
+   });
+}
+jQuery(function () {
+	//商家上传好评截图 3张
+	updateImg(1);
+	updateImg(2);
+	updateImg(3);
+	updateImg(4);
+	updateImg(5);
+	updateImg(6);
+	updateImg(7);//商品长图
+});
+
+

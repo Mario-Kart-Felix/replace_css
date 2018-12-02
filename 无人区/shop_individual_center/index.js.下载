@@ -1,0 +1,401 @@
+CDT = {
+	userNick:null,
+	currentId:'',
+	loginModifyModule :null,
+	payModifyModule: null,
+	qqModifyModule: null,
+	emailModifyModule: null,
+	mobileModifyModule: null,
+	addressModifyModule:null,
+	noticeModule: null,
+	quyuTemp:null,
+	smsSent: false,
+	countDownNum:0,
+	counter:void 0,
+	formSent:true
+};
+function countingFunc(){
+	if(CDT.countDownNum>0){
+		$('#btncaptcha').val(--CDT.countDownNum+'秒后可重发');
+	}else{
+		$('#btncaptcha').removeAttr('disabled').val('重新发送');
+		clearInterval(CDT.counter);
+		CDT.counter = void 0;
+		CDT.countDownNum = 0;
+	}
+}
+//修改登录密码函数
+function modifyloginPass(){
+	var oldPass = $.trim($('#txtOldPassword').val()),
+		newPass = $.trim($('#txtNewPassword').val());
+	if (oldPass == newPass) {
+		alert('新密码不能与旧密码相同，请重新输入！');
+		return;
+	}
+	Tr.post('/user/modify', {
+		'user.id': CDT.currentId,
+		'user.password': newPass,
+		oldPass: oldPass
+	}, function(data) {
+		if (data.code != 200) {
+			return;
+		}
+		$('#modifyModule1').html('');
+		alert('修改成功');
+	});
+}
+
+//修改用户单个信息函数
+function modifyDetail(params,module){
+	Tr.post('/user/modify',params,function(data){
+		if(data.code!=200){
+			return alert(data.msg);
+		}
+		$('#'+module).html('');
+		alert('修改成功');
+	});
+}
+//修改手机号码
+function modifyUserMobile(params,module){
+	Tr.post('/user/modify/mobile',params,function(data){
+		if(data.code !=200){
+			return alert(data.msg);
+		}
+		$('.mobileData').text(mobile);
+		$('#'+module).html('');
+		alert('修改成功');
+	})
+}
+//修改地址 只维护到省
+function modifyAddress(){
+	var state = $.trim($('#first').val())
+//		city = $.trim($('#second').val()),
+//		region = $.trim($('#thrid').val()),
+//		address = $.trim($("#address").val());
+	if(state == null || state == "" ){
+		alert("请选择所在省份");
+		return $('#first').focus();
+	}
+//	if(city == null || city == "" ){
+//		alert("请选择所在市区");
+//		return $('#second').focus();
+//	}
+//	if(region == null || region == "" ){
+//		alert("请选择所在县区");
+//		return $('#thrid').focus();
+//	}
+	Tr.post('user/modify/address',{
+		'user.state':state
+//		'user.city':city,
+//		'user.region':region,
+//		'user.address':address
+	},function(data){
+		if(data.code != 200){
+			return alert(data.msg);
+		}
+		$('.addressModifyBtnData').html(state);
+		$('#modifyModule3').html('');
+		alert("保存成功");
+		location.reload();
+	});
+}
+function loadNotice(){
+	Tr.get('/user/notice/list',{num:5},function(data){
+		if(data.code != 200)return;
+		if (data.results.length <= 0) {
+			$('.announceList').addClass('warnBox').html('<span class="iconfont">&#xf00b6;</span>没有公告!');
+			return;
+		}
+		var output = Mustache.render(CDT.noticeModule,$.extend(data,{
+			createtime:function(){
+				return this.createTime == null ? '':new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			}
+		}));
+		$('.announceList').removeClass('warnBox').html(output);
+	});
+}
+
+function existMsg(){
+	return Tr.error('旧密码错误');
+}
+
+function initBase(){
+	
+	//选择区域省级发生变化
+	$(document).on('change', '.province', function() {
+		var $me = $(this),
+		$city = $me.siblings('.city').eq(0),
+		$region = $me.siblings('.region').eq(0);
+		var id = $me.find('option:selected').attr('rid');
+		$city.find('option').eq(0).nextAll('option').remove();
+		$region.find('option').eq(0).nextAll('option').remove();
+		if (!$me.find('option:selected').val()) {
+			return;
+		}
+		Tr.get('/user/region', {
+			id: id
+		}, function(data) {
+			if (data.code != 200) return;
+			var output = Mustache.render(CDT.quyuTemp, data);
+			$city.append(output);
+		});
+	});
+	//选择区域市级发生变化
+	$(document).on('change', '.city', function() {
+		var $me = $(this),
+		$region = $me.siblings('.region').eq(0);
+		var id = $me.find('option:selected').attr('rid');
+		$region.find('option').eq(0).nextAll('option').remove();
+		if (!$me.find('option:selected').val()) {
+			return;
+		}
+		Tr.get('/user/region', {
+			id: id
+		}, function(data) {
+			if (data.code != 200) return;
+			var output = Mustache.render(CDT.quyuTemp, data);
+			$region.append(output);
+		});
+	});
+	
+	
+	$(document).on('click', '.addressModifyBtn', function() {
+		/*$('#modifyModule2').html(CDT.addressModifyModule);
+		$('#modifyModule1').html('');*/
+		$('#modifyModule3').html(CDT.addressModifyModule);
+		$('#modifyModule1').html('');
+		$('#modifyModule2').html('');
+	});
+	$(document).on('click', '.loginModifyBtn', function() {
+		$('#modifyModule1').html(CDT.loginModifyModule);
+		$('#modifyModule2').html('');
+		$('#modifyModule3').html('');
+	});
+	$(document).on('click', '.payModifyBtn', function() {
+		$('#modifyModule1').html(CDT.payModifyModule);
+		$('#modifyModule2').html('');
+		$('#modifyModule3').html('');
+	});
+	$(document).on('click', '.qqModifyBtn', function() {
+		$('#modifyModule2').html(CDT.qqModifyModule);
+		$('#modifyModule1').html('');
+		$('#modifyModule3').html('');
+	});
+	$(document).on('click', '.emailModifyBtn', function() {
+		$('#modifyModule2').html(CDT.emailModifyModule);
+		$('#modifyModule1').html('');
+		$('#modifyModule3').html('');
+	});
+	$(document).on('click', '.mobileModifyBtn', function() {
+		$('#modifyModule2').html(CDT.mobileModifyModule);
+		$('#modifyModule1').html('');
+		$('#modifyModule3').html('');
+	});
+	
+	$.validator.addMethod('smsValidCode', function(value) {
+		return Tr.regs.captcha.test($('#smsValidCode').val());
+	}, Tr.error('验证码格式错误'));
+	
+	var validator = $('#modifyForm').validate({
+		onkeyup: false,
+		rules: {
+			'oldPassword': {
+				minlength: 6,
+				maxlength: 20,
+				remote: '/checkPass'
+			},
+			'newPassword': {
+				minlength: 6,
+				maxlength: 20
+			},
+			'checkPassword': {
+				equalTo: '#txtNewPassword'
+			},
+			'newPayPass':{
+				minlength: 6,
+				maxlength: 20
+			},
+			'checkPayPass':{
+				equalTo: '#txtPayPass'
+			},
+			'qq':{
+				qq: true
+			},
+			'email':{
+				email: true,
+				remote: {
+					url: '/checkRegist',
+					type: 'get',
+					data: {
+						'user.email': function() {
+							return $("#txtEmail").val();
+						}
+					}
+				}
+			},
+			'mobile':{
+				mobile:true,
+				remote: {
+					url: '/checkRegist',
+					type: 'get',
+					data: {
+						'user.mobile': function() {
+							return $("#mobile").val();
+						}
+					}
+				}
+			},
+			'smsValidCode':{
+				required: {
+					depends: function(element) {
+						return $('#mobile').val().length > 0 && CDT.smsSent;
+					}
+				},
+				smsValidCode: {
+					depends: function(element) {
+						return $('#mobile').val().length > 0 && CDT.smsSent;
+					}
+				},
+				remote: {
+					url: '/checkRegist',
+					type: 'get',
+					data: {
+						'user.nick': CDT.userNick
+					}
+				}
+			}
+		},
+		messages: {
+			'oldPassword': {
+				remote: existMsg()
+			},
+			'mobile': {
+				remote: Tr.error('该手机号码已存在!')
+			},
+			'smsValidCode':{
+				remote: Tr.error('验证码错误')
+			},
+			'email': {
+				remote: Tr.error('该邮箱已存在!')
+			}
+		}
+	});
+	//修改地址
+	$(document).on('click','#modifyaddressBtn',function(){
+		if(validator.form()){
+			modifyAddress();
+			location.reload();
+		}
+	});
+	//登录密码修改
+	$(document).on('click','#modifyloginBtn', function(){
+		//校验
+		if(validator.form()){
+			modifyloginPass();
+		}
+	});
+	//支付密码修改
+	$(document).on('click','#modifyPayBtn', function(){
+		if(validator.form()){
+			var payPass = $('#txtPayPass').val();
+			var params = {
+				'user.id': CDT.currentId,
+				'user.payPassword': payPass
+			};
+			modifyDetail(params,'modifyModule1');
+			$('.payModifyBtn').remove();
+			$('.noData').hide();
+			$('.hasData').show();
+		}
+	});
+	//qq修改
+	$(document).on('click','#modifyQqBtn', function(e){
+		if(validator.form()){
+			var qq = $('#txtQq').val();
+			var params = {
+				'user.id': CDT.currentId,
+				'user.qq': qq
+			};
+			modifyDetail(params,'modifyModule2');
+			$('.qqData').text(qq);
+		}
+
+	});
+	
+	
+
+	//email修改
+	$(document).on('click','#modifyEmailBtn', function(){
+		if(validator.form()){
+			var email = $('#txtEmail').val();
+			var params = {
+				'user.id': CDT.currentId,
+				'user.email': email
+			};
+			modifyDetail(params,'modifyModule2');
+			$('.emailData').text(email);
+		}
+	});
+	//发送手机验证码
+	$(document).on('click','#btncaptcha',function(){
+		CDT.smsSent = false;
+		// 当其他校验通过之后才可以发送
+		if (!validator.form()) {
+			return;
+		}
+		var mobile = $('#mobile').val()
+		Tr.post('/regist/sendSms', {
+			'user.mobile':mobile,
+			'user.nick':CDT.userNick
+		}, function(data) {
+			if (data.code == 800101) {
+				alert('该手机号码已注册，请使用您自己的号码！');
+				return;
+			}
+			if (data.code == 555){
+				alert('短信发送失败，请重试！');
+			}
+			if (data.code != 200) {
+				return;
+			}
+			$('#btncaptcha').attr('disabled','disabled');
+			CDT.countDownNum = 60;
+			alert('验证短信已发送，请稍等！');
+			CDT.counter = setInterval(countingFunc,1000);
+			CDT.smsSent = true;
+		});
+	});
+	
+	/*财务情况区域*/
+	// 发布任务
+	$('#btnPublishTask').click(function() {
+		window.location.href = '/task/publish';
+	});
+	$('#btnDepositWithdraw').click(function() {
+		window.location.replace('/user/withdraw');
+	});
+}
+
+$(function(){
+	CDT.loginModifyModule = $('#loginModifyModule').remove().val();
+	CDT.addressModifyModule= $('#addressModifyModule').remove().val();
+	CDT.payModifyModule = $('#payModifyModule').remove().val();
+	CDT.qqModifyModule = $('#qqModifyModule').remove().val();
+	CDT.mobileModifyModule = $('#mobileModifyModule').remove().val();
+	CDT.emailModifyModule = $('#emailModifyModule').remove().val();
+	CDT.currentId = $('#userDetail').attr('userId');
+	CDT.noticeModule = $('#noticeModule').remove().val();
+	CDT.quyuTemp = $('#quyuTemp').remove().val();
+	// 自定义消息格式
+	$.extend($.validator.messages, {
+		required: Tr.error('必填'),
+		email: Tr.error('邮箱地址不正确'),
+		qq: Tr.error('QQ号码不正确'),
+		equalTo: Tr.error('两次输入密码不相同'),
+		mobile: Tr.error('手机号码不正确'),
+		maxlength: Tr.error('不能超过{0}个字符'),
+		minlength: Tr.error('至少{0}个字符')
+	});
+	initBase();
+	loadNotice();
+});

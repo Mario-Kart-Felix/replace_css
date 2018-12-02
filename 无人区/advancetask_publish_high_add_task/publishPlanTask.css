@@ -1,0 +1,44 @@
+.n-loadPic{
+	width: 150px; height: 150px;
+	margin-top: 20px; margin-left: 84px;
+	border: 1px solid #ccc;
+	 position: relative;
+}
+.n-upload-btn{
+	clear: both; display: block;
+}
+.n-upload-title{
+	width: 80px; height: 24px; border: 1px solid #ccc;
+	position: absolute; left: 50%; top: 50%;
+	margin-left: -40px; margin-top: -12px;
+	 text-align: center; line-height: 24px;
+	cursor: pointer; border-radius:2px ;
+}
+.n-upload-title:hover{
+	border: 1px solid #CA242F;
+	
+}
+.n-upload-img{
+	width: 100%; height: 100%; position: absolute;
+	left: 0;top: 0; display: none;
+}
+.n-upload-delete{
+	font-size: 12px; color: #999;
+	position: absolute;right: 0; top: 0; line-height: 20px; cursor: pointer;
+}
+.n-upload-delete:hover{
+	color: #CA242F;
+}
+.n-loadPic .error{
+	position: absolute;bottom: -8px; right: -58px;
+}
+
+.n-hide{
+	display: none;
+}
+.n-show{
+	display: block;
+}
+.n-min-h40{
+	min-height: 40px;  height: auto!important; overflow: hidden;
+}

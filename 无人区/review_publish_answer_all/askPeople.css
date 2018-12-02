@@ -1,0 +1,36 @@
+.normTable tr {
+	   	 border-bottom: 1px solid #d1d1d1;
+}
+.normTable td {
+ vertical-align: middle;
+}
+.c-selctShop{
+	min-height: 40px; height: auto;
+	 overflow: hidden; margin-left: 20px;
+}
+.c-buyerAnswer,.c-seeLogo{
+	 color: #0A8095; cursor: pointer;
+}
+.c-buyerAnswer:hover,.c-seeLogo:hover{
+	text-decoration: underline;
+}
+.c-pop-answer,.c-pop-answerContent,.c-pop-appeal,.c-pop-publish{
+	position: fixed;width: 100%; height: 100%; z-index: 1000;
+}
+.modalWnd{
+	position: fixed; left: 50%; margin-left: -220px; top: 30%;
+}
+.c-appealBtn,.c-answerBtn,.c-passBtn,.c-cancelBtn,.c-nomoneyBtn,.c-delayBtn{
+	border: none; cursor: pointer; margin-top: 5px;
+}
+
+.c-detailBtn{
+	padding: 5px 15px; line-height: 20px;
+}
+button.stdColorButton{
+	border: none; cursor: pointer;
+}
+.c-btn{
+		    padding: 5px 15px;
+    	line-height: 20px;
+}

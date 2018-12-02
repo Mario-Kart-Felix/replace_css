@@ -1,0 +1,50 @@
+var Upload_URL = "/user/upload/token";
+function updateImg(index){
+	var $list1 = $(obtn),
+    ratio = window.devicePixelRatio || 1,
+    thumbnailWidth = 100 * ratio,
+    thumbnailHeight = 100 * ratio,
+    uploader1;
+   uploader1 = WebUploader.create({
+       fileNumLimit: 1,
+       auto: true,
+       server: '/wap/workOrder/uploadImage' ,
+       pick: '#obtn',
+       accept: {
+           title: 'Images',
+           extensions: 'gif,jpg,jpeg,bmp,png',
+           mimeTypes: 'image/jpg,image/jpeg,image/png'
+       }
+   });
+   // 当有文件添加进来的时候
+   uploader1.on('fileQueued', function (file) {
+      
+	$("#uploading").html("正在上传...");
+      
+   });
+
+  
+   // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+   uploader1.on('uploadSuccess', function (file, response) {
+     	$("#uploadPic").attr("src",response.results).show();
+     	$("#uploading,#obtn").hide();
+     	$("#deleteImg").show()
+   });
+
+   // 文件上传失败，现实上传出错。
+   uploader1.on('uploadError', function (file) {
+   	$("#uploading").html("上传图片").add("#obtn").show();
+      alert("上传失败");
+   });
+   uploader1.on('uploadComplete', function (file) {
+       uploader1.reset();
+   });
+}
+jQuery(function () {
+	//商家上传好评截图 3张
+	updateImg();
+	$("#deleteImg").click(function(){
+		$("#uploadPic").attr("src",null).hide();
+		$("#uploading").html("上传图片").add("#obtn").show();
+	});
+});

@@ -1,0 +1,145 @@
+CDT = {
+	searchType:"PUBLISHED",
+	taskCellTemp: null,
+	currPageNo: 1,
+	pageSize: 10,
+	currId:''
+};
+//加载任务
+function loadTask(pageNo) {
+	Tr.get('/seller/listSdTaskAfterComment', {
+		'vo.afterComment': $(".fundTab.focus").attr("data-status"),
+		'vo.shopId': $("#shopName").val(),
+		'vo.sdTaskId': $("#taskId").val(),
+		'vo.id': $("#subId").val(),
+		'vo.buyerAccountNick': $("#buyerAccountNick").val(),
+		'vo.pageNo': pageNo,
+		'vo.pageSize': CDT.pageSize
+	}, function(data) {
+		if (data.code != 200) return;
+		if (data.results.length <= 0) {
+			$("#noMsg").show();
+			$('.pagination').empty();
+			$('.normTable').hide();
+			return;
+		}
+		var output = Mustache.render(CDT.taskCellTemp,data,$.extend(data,{
+			ingotStr : function() {
+				return $.number((this.ingot+this.comssionProfit) / 100, 2);
+			},
+			paidFeeStr : function() {
+				return $.number(this.paidFee / 100, 2);
+			},
+			postageStr : function() {
+				return $.number(this.postage / 100, 2);
+			},
+			itemPriceStr : function() {
+				return $.number(this.itemPrice / 100, 2);
+			},
+			modifyTimeStr : function() {
+				if (this.modifyTime) {
+					return new Date(this.updateTime)
+							.Format('yyyy-MM-dd hh:mm:ss');
+				}
+				return '----';
+			},
+			takeTimeStr : function() {
+				if (this.takeTime == null) {
+					return "-----";
+				}
+				return new Date(this.takeTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			createTimeStr : function() {
+				if (this.createTime == null) {
+					return "-----";
+				}
+				return new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			statusStr : function() {
+				if (this.status == "FINISHED") {
+					return "已完成";
+				}
+				if (this.status == "CANCEL") {
+					return "已取消";
+				}
+				if (this.status == "PUBLISHED") {
+					return "已发布，待接手";
+				}
+				if (this.status == "WAIT_EXAMINE") {
+					return "待审核";
+				}
+				if (this.status == "WAIT_PAY") {
+					return "待支付";
+				}
+				if (this.status == "WAIT_SEND_GOODS") {
+					return "待发货";
+				}
+				if (this.status == "WAIT_WIDTHDRAW") {
+					return "待提现";
+				}
+				if (this.status == "WAIT_COMMENT") {
+					return "待好评";
+				}
+				if (this.status == "NOPASS") {
+					return "审核不通过";
+				}
+				if (this.status == "APPEAL") {
+					return "申诉中";
+				}
+			}
+		}));
+		$('.normTable').show();
+		$("#noMsg").hide();
+		$('#taskContainer').html(output);
+		$('.pagin-btm').show();
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadTaskCallBack,
+			callback_run: false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function loadTaskCallBack(index, jq) {
+    loadTask(index + 1);
+}
+
+
+function initBase(){
+	//查询
+	$('#queryBtn').click(function(){
+		loadTask(1);
+	});
+	$(document).on("click",".fundTab",function(){
+		$(".fundTab").removeClass("focus");
+		$(this).addClass("focus");
+		loadTask(1);
+	});
+	$(document).on("click",".cancelAfterComment",function(){
+		if(!confirm("是否确认撤销？")){
+			return false;
+		}
+		Tr.post('/seller/sdsubTask/cancelAfterCommentByTaskId',{
+			"id":$(this).attr("data-id")
+		}, function(data) {
+			if(data.code!=200){
+				return alert(data.msg);
+			}
+			alert("撤销成功");
+			location.href=location.href;
+		});
+	});
+}
+
+$(function(){
+	CDT.taskCellTemp = $('#taskCellTemp').remove().val();
+	Mustache.parse(CDT.taskCellTemp);
+	
+	initBase();
+	loadTask(1);
+});
+

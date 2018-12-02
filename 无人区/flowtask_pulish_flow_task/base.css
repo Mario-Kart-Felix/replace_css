@@ -1,0 +1,51 @@
+/*前台头部*/
+.topbar{color:#666666;}
+.topbar a{color:#666666;}
+.topbar .f_l{}
+.topbar .f_l .logo{}
+.topbar .f_r{color:#e7e6e6;}
+
+/* 会员注册 */
+.reg-box,.findpwd-box{padding:20px;background:#fff;margin:40px 0;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;border:1px solid #e6e6e6;box-shadow:0 15px 30px rgba(0, 0, 0, .3);}
+.reg-box .title{text-align:center;border-bottom:1px solid #f1f1f1;margin-bottom:20px;padding-bottom:20px;font-size:20px;font-weight:bold;}
+.reg-form{}
+.reg-form h4{display:block;font-weight:700;font-size:15px;padding:15px 0;}
+.reg-form ul li{display:block;text-align:left;padding:10px 0;}
+.reg-form ul li label{display:inline-block;width:120px;text-align:right;margin-right:10px;color:#999;font-size:14px;}
+.reg-form ul li label em{margin-right:4px;color:#ff0000;}
+.reg-form ul li .getCode{height:35px;margin-left:8px;cursor:pointer;}
+.reg-form ul li .code_img{cursor:pointer;}
+.reg-form .ml{padding-left:132px;}
+.reg-form .reg-submit{margin:15px 0;}
+.reg-form .reg-submit input{height:45px;}
+
+.success{clear:both;margin:25px 0;}
+.success i{display:inline-block;width:56px;height:56px;background:url(http://tuiwangwang.com/statics/themes/Default/images/success.png) no-repeat;vertical-align:middle;margin-right:10px;}
+.success p span{font-size:30px;color:#333;}
+.success p{clear:both;margin-bottom:15px;text-align:center;font-size:16px;line-height:25px;color:#666;}
+.success p b{color:#31bd80;}
+.success .fourbtn{width:250px;display:inline-block;line-height:46px;margin-top:30px;}
+.success a:hover.fourbtn{text-decoration:none;background:#ff7f00;color:#FFF;}
+
+/* 会员登录 */
+.login-box{margin:150px 0 300px 0;}
+.login-tab{width:350px;margin:0 auto;}
+.login-tab h1{margin:0 0 30px 0;}
+.login-tab .logo a{text-indent:-9999px;overflow:hidden;display:inline-block;width:315px;height:45px;}
+.login-tab ul li{clear:both;margin-bottom:10px}
+.login-tab .clearfix{padding:10px 0;}
+.login-tab .clearfix .f_l input{vertical-align:middle;}
+.login-tab .login-submit input,.fourbtn{width:345px;height:46px;background:#ff8200;cursor:pointer;color:#fff;border:none;font-size:14px;font-weight:bold;border-radius:2px;-moz-border-radius:2px;-webkit-border-radius:2px;}
+.login-tab ul li.tr{padding-top:10px;}
+
+.ipt-box{position:relative;width:340px;height:45px;}
+.ipt-box .ico{position:absolute;top:1px;left:1px;display:inline-block;width:50px;height:45px;background-image:url(http://tuiwangwang.com/statics/themes/Default/images/login_icon.png);background-repeat:no-repeat;background-color:#fbfbfb;}
+.ipt-box .user-ico{background-position:0 0;}
+.ipt-box .pwd-ico{background-position:0 -48px;}
+.ipt-box .input_01{height:45px;width:100%;text-indent:60px;border:1px solid #dbe0e5;font-size:14px;}
+.ipt-box .input_01:hover{border-color:#5abec6;background:#fcfffe;}
+
+/*找回密码*/
+.findpwd-box .title{text-align:center;border-bottom:1px solid #f1f1f1;margin-bottom:20px;padding-bottom:20px;font-size:20px;font-weight:bold;}
+.findpwd-box .reg-form{padding-left:220px;margin:30px 0;}
+

@@ -1,0 +1,74 @@
+$(function(){
+		var CDT={
+			"vo.shopId":$("#dianpuContainer .shop").eq(0).attr("value"),
+			'vo.pageNo' : 1,
+			'vo.pageSize' : 10
+		};
+		function mypages2(page){
+			page++;
+			mypage(page);
+		}
+		
+		function mypage(pageN){
+			CDT['vo.pageNo']=pageN||CDT['vo.pageNo'];
+			Tr.get("/seller/listItemByShop",CDT,function(data){
+				
+				$("#d-tbody").html(Mustache.render($("#tpl").html(),$.extend(data,{
+					ocreateTime:function(){
+						return new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss')
+					}
+				})));
+				
+				$('.pagination').pagination(data.totalCount, {
+					items_per_page : 10,
+					num_display_entries : 5,
+					current_page : pageN,
+					num_edge_entries : 2,
+					callback : mypages2,
+					callback_run : false
+				});
+				if(data.totalCount<10){
+					$('.pagination').hide();
+				}else{
+					$('.pagination').show();
+				}
+			});
+		}
+		
+		mypage(1);
+		
+		$("#dianpuContainer .shop").click(function(){
+			
+			CDT["vo.shopId"]=$("#dianpuContainer .shop").removeClass("selectedCtb").filter(this).addClass("selectedCtb").attr("value");
+			mypage(1);
+			
+		}).eq(0).addClass("selectedCtb");
+		
+		//点击发布单数
+		var popTpl=$("#c-popTpl").html();
+		$("#d-tbody").on("click",".c-publishBtn",function(){
+			$(document.body).append(Mustache.render(popTpl,{itemId:$(this).attr("data-itemId")}));
+		});
+		$(document).on("click",".c-pop-publish .close",function(){
+			$(".c-pop-publish").remove();
+		});
+		$(document).on("click",".c-pop-publish .c-pop-confirmBtn",function(){
+			var publishNum=$.trim($(".c-pop-publish .inputText").val());
+			var itemId=$(this).attr("data-itemId");
+			if(!/^\+?[1-9][0-9]*$/.test(publishNum)) return alert("单数必须为大于0的整数");
+			if(!confirm("确认发布"+publishNum+"单吗？")) return;
+			Tr.post("/seller/publishQuestionTask",{
+				"vo.itemId":itemId,
+				"vo.totalNum":publishNum
+			},function(data){
+				if(data.code==200){
+					return alert("发布成功！"),mypage();
+				}
+				if(data.msg){
+					alert(data.msg);
+				}
+			});
+			$(".c-pop-publish").remove();
+		});
+
+	});

@@ -1,0 +1,78 @@
+CDT = {
+	currentId:'',
+	rowTemp: null,
+	currPageNo: 1,
+	pageSize: 20
+};
+//修改用户单个信息函数
+function loadPage(pageNo){
+	Tr.get('/user/suggest/list', {
+		'vo.pageNo': pageNo,
+		'vo.pageSize': CDT.pageSize
+	}, function(data) {
+		if (data.code != 200) return;
+		if (data.results.length <= 0) {
+			$('.normTable').hide();
+			$('.pagin-btm').hide();
+			$('#noMsg').show();
+			return;
+		}
+		var output = Mustache.render(CDT.rowTemp, $.extend(data, {
+			createtime: function() {
+				return new Date(this.createTime).Format('yyyy-MM-dd');
+			},
+			answertime:function(){
+				return new Date(this.answerTime).Format('yyyy-MM-dd');
+			},
+			statusStr:function(){
+				if(this.status=="FINISHED"){
+					return true;
+				}else{
+					return false;
+				}
+			}
+		}));
+		$('#noMsg').hide();
+		$('#suggestAll').html(output);
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function initBase(){
+	$("#btnModifyMsg").click(function(){
+		var qq=$("#oldQq").val();
+		var email=$("#oldEmail").val();
+		var mobile=$("#oldMobile").val();
+		var content=$("#content").val();
+		if(!$.trim(content)){
+			$("#content").css("border-color","#ca242f").focus();
+			return false;
+		}
+		var type=$("#status").val();
+		var img=$("#uploadPic").attr("src");
+		Tr.get('/user/add/suggest',{
+			'vo.qq':qq,
+			'vo.email':email,
+			'vo.mobile':mobile,
+			'vo.content':content,
+			'vo.type':type,
+			'vo.img':img
+		},function(data){
+			if(data.code!=200){
+				return;
+			}
+			alert('提交成功');
+			location.href=location.href;
+		});
+	});
+}
+
+$(function(){
+	// 自定义消息格式
+	initBase();
+	CDT.rowTemp = $('#rowTemp').remove().val();
+	Mustache.parse(CDT.rowTemp);
+	loadPage(1);
+	
+});
+

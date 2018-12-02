@@ -1,0 +1,120 @@
+﻿CDT = {
+	smsSent: false,
+	countDownNum:0,
+	counter:void 0,
+	formSent:true
+};
+function existMsg(field) {
+	return Tr.error('该' + field + '不存在!');
+}
+function countingFunc(){
+	if(CDT.countDownNum>0){
+		$('#btncaptcha').val(--CDT.countDownNum+'秒后可重发');
+	}else{
+		$('#btncaptcha').removeAttr('disabled').val('重新发送');
+		clearInterval(CDT.counter);
+		CDT.counter = void 0;
+		CDT.countDownNum = 0;
+	}
+}
+function validateRulesSet(){
+	// 自定义消息格式
+	$.extend($.validator.messages, {
+		required: Tr.error('必填'),
+		mobile: Tr.error('格式不正确'),
+		maxlength: Tr.error('不能超过{0}个字符'),
+		minlength: Tr.error('至少{0}个字符')
+	});
+	$.validator.addMethod('smsValidCode', function(value) {
+		return Tr.regs.captcha.test($('#smsValidCode').val());
+	}, Tr.error('验证码格式错误'));
+	var validator = $('#passForm').validate({
+		onkeyup: false,
+		rules: {
+			'user.mobile': {
+				mobile: true,
+				remote:'/checkFindPass'
+			},
+			'smsValidCode':{
+				required: {
+					depends: function(element) {
+						return $('#mobile').val().length > 0 && CDT.smsSent;
+					}
+				},
+				smsValidCode: {
+					depends: function(element) {
+						return $('#mobile').val().length > 0 && CDT.smsSent;
+					}
+				},
+				remote: {
+					url: '/checkFindPass',
+					type: 'get',
+					data: {
+						'user.mobile': function() {
+							return $("#mobile").val();
+						}
+					}
+				}
+			}
+		},
+		messages: {
+			'user.mobile': {
+				remote: existMsg('手机号码')
+			},
+			'smsValidCode':{
+				remote: Tr.error('验证码错误')
+			}
+		}
+	});
+	return validator;
+};
+//看不清楚，换一张
+$('#changeCaptcha').click(function(){
+	$('.firstCap').hide();
+	$('#capIframe').show();
+});
+//获取验证码
+$(function(){
+	var validator = validateRulesSet();
+	//获取短信验证码
+	$('#btncaptcha').click(function(){
+		CDT.smsSent = false;
+		// 当其他校验通过之后才可以发送
+		if (!validator.form()) {
+			return;
+		}
+		var mobile = $('#mobile').val(),nick = $('#nick').val();
+		Tr.post('/sendSmsFindPass', {
+			'user.mobile':mobile,
+			authenticityToken: $('input[name="authenticityToken"]').val()
+		}, function(data) {
+			if (data.code == 800101) {
+				alert('手机号码不存在，请使用注册手机号码！');
+				return;
+			}
+			if (data.code == 555){
+				alert('短信发送失败，请重试！');
+			}
+			if (data.code != 200) {
+				return;
+			}
+			$('#btncaptcha').attr('disabled','disabled');
+			CDT.countDownNum = 60;
+			alert('验证短信已发送，请稍等！');
+			CDT.counter = setInterval(countingFunc,1000);
+			CDT.smsSent = true;
+		});
+	});
+	// 修改
+	$('#btnBeginToVerify').click(function() {
+		// 校验表单参数
+		if (validator.form()) {
+			 if (!Tr.regs.captcha.test($('#smsValidCode').val())) {
+				alert('短信验证码不正确！');
+				return;
+			}
+			$('#passForm').submit();
+		}
+	});
+});
+

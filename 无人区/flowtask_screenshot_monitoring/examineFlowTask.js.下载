@@ -1,0 +1,139 @@
+CDT = {
+	taskCellTemp: null,
+	currPageNo: 1,
+	pageSize: 20,
+	taskId:null
+};
+//加载任务
+function loadTask(pageNo) {
+	var status = $('#status').val();
+	Tr.get('/user/subtask/listSellerTasksFlow', {
+		'vo.status': status,
+		'vo.pageNo': pageNo,
+		'vo.pageSize': CDT.pageSize
+	}, function(data) {
+		if (data.code != 200) {
+			return;
+		}
+		
+		var output = Mustache.render(CDT.taskCellTemp, $.extend(data, {
+			isTaken: function() {
+				return this.status=='WAIT_EXAMINE';
+			},
+			platIcon: function(){
+				return 'plat_' + this.platform;
+			},
+			createTimeStr: function() {
+				return this.takenTime == null? '':new Date(this.takenTime).Format('yyyy-MM-dd hh:mm');
+			},
+			examineTimeStr: function() {
+				return this.examineTime == null? '':new Date(this.examineTime).Format('yyyy-MM-dd hh:mm');
+			},statusStr:function(){
+				if(this.status=='NOPASS'){
+					return "审核不通过";
+				}
+				if(this.status=='PASS'){
+					return "审核通过";
+				}
+				
+			}
+		}));
+		$('#taskContainer').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadTaskCallBack,
+			callback_run: false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function loadTaskCallBack(index, jq) {
+    loadTask(index + 1);
+}
+
+
+function initBase(){
+	//查询
+	$('#queryBtn').click(function(){
+		loadTask(1);
+	});
+
+	$(document).on('click','.boost',function(){
+		$('#boostWnd').show();
+	});
+
+	$("#examineAllBtn").click(function(){
+		Tr.post('/seller/task/sellerAutoExamine', {
+		}, function(data) {
+			if (data.code != 200) {
+				return;
+			}
+			alert("审核提交成功!");
+			loadTask(1);
+		});
+	});
+	$('.btnNext').click(function(){
+		$('.btnPrev,#stepShower-2').show();
+		$('#stepShower-1').hide();
+		$(this).hide();
+	});
+	$('.btnPrev').click(function(){
+		$('.btnNext,#stepShower-1').show();
+		$('#stepShower-2').hide();
+		$(this).hide();		
+	});	
+
+	$(document).on('click','.examinePassBtn',function(){
+		Tr.post('/user/flow/task/examinePassFlowTask', {
+			'id': $(this).attr("data-id")
+		}, function(data) {
+			if (data.code != 200) {
+				return;
+			}
+			alert("审核成功!");
+			loadTask(1);
+		});
+	});
+	//增加工单弹出框
+   
+	$(document).on('click','.examineNoPassBtn',function(){
+		 CDT.taskId = $( this).attr( 'data-id');
+         Tr.popup('cancelWnd');
+	});
+	
+	//增加工单
+	$("#btnAddWorkOrder").click(function(){
+		var memo = $.trim($("#memo").val());
+		if(memo==null||memo=="") {
+			alert("请输入工单内容！");
+			return;
+		}
+		var jobType = $("#jobType").val();
+		Tr.post('/user/flow/task/addWorkOrder',{
+			'order.jobType':jobType,
+			'order.buyerTaskId':CDT.taskId,
+			'order.memo':memo
+		},function(data){
+			if(data.code!=200){
+				alert(data.msg);
+				return;
+			}
+			$("#addWorkOrderWnd").hide();
+			alert('提交成功');
+			loadTask(1);
+			$("#cancelWnd").hide();
+		});
+	});
+}
+
+$(function(){
+	CDT.taskCellTemp = $('#taskCellTemp').remove().val();
+	Mustache.parse(CDT.taskCellTemp);
+
+	initBase();
+	loadTask(1);
+});

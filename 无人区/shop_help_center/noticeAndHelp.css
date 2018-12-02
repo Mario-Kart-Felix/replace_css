@@ -1,0 +1,16 @@
+.announceList{
+
+}
+.announceList li{
+	line-height: 35px;
+}
+.announceCell .title{
+	color:#555;
+}
+.announceCell .title:hover{
+	color:#0F9EE2;
+	text-decoration: underline;
+}
+.announceCell .date{
+	float:right;
+}

@@ -1,0 +1,193 @@
+var CDT={
+		status:$("#searchStatus .focus").attr("status"),
+		pageNo : 1,
+		pageSize : 10,
+		taskCellTemp:null
+	};
+function loadTask(pageNo) {
+	Tr.get('/app/buyer/listQuestionTask', {
+		'vo.status': CDT.status,
+		'vo.pageNo': pageNo,
+		'vo.sdTaskId': $("#sdTaskId").val(),
+		'vo.buyerAccountNick': $("#buyer_nick").val(),
+		'vo.pageSize': CDT.pageSize
+	}, function(data) {
+		if (data.code != 200) return;
+		if (data.results.length <= 0) {
+			$("#noMsg").show();
+			$('.pagination').empty();
+			$('.normTable').hide();
+			return;
+		}
+		var output = Mustache.render(CDT.taskCellTemp,$.extend(data,{
+			waitBuyerSubmit:function(){
+				if(this.status=="WAIT_BUYER_SUBMIT"||this.status=="SELLER_CONFIRM"){
+					return true;
+				}
+			},
+			waitExamine:function(){
+				if(this.status=="WAIT_EXAMINE"){
+					return true;
+				}
+			},
+			appeal:function(){
+				if(this.status=="APPEAL"){
+					return true;
+				}
+			},
+			taskTimeStart:function(){
+				return new Date(this.startTime).Format('yyyy-MM-dd hh:mm:ss')
+			},
+			taskEndTime:function(){
+				return new Date(this.endTime).Format('yyyy-MM-dd hh:mm:ss')
+			},
+			applayImgStr:function(){
+				if(this.applayImg==null){
+					return false;
+				}
+				return true;
+			},
+			afterImgStr:function(){
+				if(this.questionImg==null){
+					return false;
+				}
+				return true;
+			}
+		}));
+		$('.normTable').show();
+		$("#noMsg").hide();
+		$('#taskContainer').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadTaskCallBack,
+			callback_run: false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function loadTaskCallBack(index, jq) {
+    loadTask(index + 1);
+}
+
+$(function(){
+	loadTask(1);
+	CDT.taskCellTemp = $('#taskCellTemp').remove().val();
+	Mustache.parse(CDT.taskCellTemp);
+	$('#queryBtn').click(function(){
+		loadTask(1);
+	});
+	$("#searchStatus").on("click",".tab-cell",function(){
+		CDT.status=$("#searchStatus .tab-cell").removeClass("focus").filter(this).addClass("focus").attr("status");
+		if(CDT.status=="WAIT_EXAMINE"){
+			$("#examineAllBtn").show();
+		}else{
+			$("#examineAllBtn").hide();
+		}
+		loadTask(1);
+	});
+	
+	var odata={};
+	var appealData={};
+	//指定回答弹窗
+	$(document).on("click",".c-answerBtn",function(){
+		$(".c-pop-answer").show();
+		$(".c-pop-answer textarea").val("");
+		odata["vo.id"]=$(this).data("id");
+	});
+	
+	$(".c-pop-answer .c-pop-confirmBtn").on("click",function(){
+		
+		odata["vo.answer"]=$(".c-pop-answer textarea").val();
+		
+		Tr.post("/seller/confirmQuestion",odata,function(data){
+			if(data.code==200){
+				return loadTask(CDT.currPageNo),alert("发布成功！");
+			}else if(data.msg){
+				alert(data.msg);
+			}
+		});
+		
+		$(".c-pop-answer").hide();
+	});
+	
+	
+	//申诉按钮显示弹窗
+	$(document).on("click",".c-appealBtn",function(){
+		appealData["id"]=$(this).data("id");
+		$(".c-pop-appeal textarea").val("");
+		$(".c-pop-appeal").show();
+	});
+	
+	$(".c-pop-appeal .c-pop-confirmBtn").on("click",function(){
+		appealData["memo"]=$(".c-pop-appeal textarea").val();
+		Tr.post("/seller/sellerExamineAppeal",appealData,function(data){
+			if(data.code==200){
+				loadTask(CDT.currPageNo);
+				return alert("申诉成功！");
+			}else if(data.msg){
+				return alert(data.msg);
+				
+			}
+		});
+		$(".c-pop-appeal").hide();
+	});
+	
+	
+	//点击查看显示商家指定回答内容
+	var Ctpl=$("#c-popTpl").html();
+	$(document).on("click",".c-buyerAnswer",function(){
+		$(document.body).append(Mustache.render(Ctpl,{msg:$(this).data("msg")}));
+	});
+	
+	$(document).on("click",".c-pop-answerContent .close",function(){
+		$(".c-pop-answerContent").remove();
+	});
+	
+	
+	//审核通过
+	$(document).on("click",".c-passBtn",function(){
+		Tr.post("/seller/sellerExaminePass",{"id":$(this).data("id")},function(data){
+			if(data.code==200){
+				loadTask(CDT.currPageNo);
+				return alert("通过成功！");
+			}else if(data.msg){
+				alert(data.msg);
+			}
+		});
+	});
+	
+	//审核全部通过
+	$("#examineAllBtn").on("click",function(){
+		if(!confirm("确认全部通过吗？")){
+			return;
+		}
+		Tr.post("/seller/sellerExaminePassAll",{
+			"type":'QUESTION'
+		},function(data){
+			if(data.code==200){
+				loadTask(CDT.currPageNo);
+			}else if(data.msg){
+				alert(data.msg);
+			}
+		});
+	});
+	
+	//取消买手任务
+	$(document).on("click",".c-cancelBtn",function(){
+		if(!confirm("确认取消吗？")){
+			return;
+		}
+		Tr.post("/seller/cancelQuestionTask",{id:$(this).data("id")},function(data){
+			if(data.code==200){
+				loadTask(CDT.currPageNo);
+				return alert("取消成功！");
+			}else if(data.msg){
+				alert(data.msg);
+			}
+		});
+	})
+});

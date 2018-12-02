@@ -1,0 +1,331 @@
+CDT = {
+	taskCellTemp: null,
+	taskCancelTemp:null,
+	currPageNo: 1,
+	pageSize: 500,
+	taskId:null,
+	status:"WAIT_CONFIRM"
+};
+//加载任务
+function loadTask(pageNo) {
+	var shop = $('#shops').val();
+	var taskid = $('#taskid').val();
+	var orderid = $('#order_id').val();
+	var buyerAccountNick = $('#buyer_nick').val();
+	var updateTimeStart =($.trim($('#updateTimeStart').val())) ? $.trim($('#updateTimeStart').val()) + ' 00:00:00' : '';
+	var updateTimeEnd =($.trim($('#updateTimeEnd').val())) ? $.trim($('#updateTimeEnd').val()) + ' 00:00:00' : ''; 
+	Tr.get('/seller/task/listSDSubTask', {
+		'vo.id':$("#sdid").val(),
+		'vo.shopId': shop,
+		'vo.buyerAccountNick': buyerAccountNick,
+		'vo.sdTaskId': taskid,
+		'vo.orderId': orderid,
+		'vo.updateTimeStart': updateTimeStart,
+		'vo.updateTimeEnd': updateTimeEnd,
+		'vo.pageNo': pageNo,
+		'vo.pageSize': CDT.pageSize
+	}, function(data) {
+		if (data.code != 200) {
+			return;
+		}
+		var output = Mustache.render(CDT.taskCellTemp, $.extend(data, {
+			takeTimeStr: function() {
+				return this.takeTime == null? '':new Date(this.takeTime).Format('yyyy-MM-dd hh:mm');
+			},
+			paidFeeStr: function() {
+				return this.paidFee == null? '':$.number(this.paidFee/100,2);
+			},itemPriceStr: function() {
+				return this.itemPrice == null? '':$.number(this.itemPrice/100,2);
+			},postageStr: function(){
+				return this.postage == null? '':$.number(this.postage/100,2);
+			},
+			statusStr : function() {
+				if (this.status == "FINISHED") {
+					return "已完成";
+				}
+				if (this.status == "CANCEL") {
+					return "已取消";
+				}
+				if (this.status == "PUBLISHED") {
+					return "已发布，待接手";
+				}
+				if (this.status == "WAIT_EXAMINE") {
+					return "待审核";
+				}
+				if (this.status == "WAIT_PAY") {
+					return "待支付";
+				}
+				if (this.status == "WAIT_SEND_GOODS") {
+					return "待发货";
+				}
+				if (this.status == "WAIT_WIDTHDRAW") {
+					return "待提现";
+				}
+				if (this.status == "WAIT_COMMENT") {
+					return "待好评";
+				}
+				if (this.status == "NOPASS") {
+					return "审核不通过";
+				}
+				if (this.status == "APPEAL") {
+					return "申诉中";
+				}
+			},expressTypeStr:function(){
+				if(this.expressType=="SELLERKD"){
+					return false;
+				}else{
+					return true;
+				}
+			}
+		}));
+		$('#taskContainer').removeClass('warnBox').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadTaskCallBack,
+			callback_run: false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function loadSubTask(pageNo) {
+	var shop = $('#shops').val();
+	var taskid = $('#taskid').val();
+	var orderid = $('#order_id').val();
+	var buyerAccountNick = $('#buyer_nick').val();
+	var updateTimeStart =($.trim($('#updateTimeStart').val())) ? $.trim($('#updateTimeStart').val()) + ' 00:00:00' : '';
+	var updateTimeEnd =($.trim($('#updateTimeEnd').val())) ? $.trim($('#updateTimeEnd').val()) + ' 00:00:00' : ''; 
+	Tr.get('/user/sdsubTask/findSDSubTaskByTaskId', {
+		'vo.status': CDT.status,
+		'vo.id':$("#sdid").val(),
+		'vo.shopId': shop,
+		'vo.buyerAccountNick': buyerAccountNick,
+		'vo.sdTaskId': taskid,
+		'vo.orderId': orderid,
+		'vo.updateTimeStart': updateTimeStart,
+		'vo.updateTimeEnd': updateTimeEnd,
+		'vo.pageNo': pageNo,
+		'vo.pageSize': CDT.pageSize
+	}, function(data) {
+		if (data.code != 200) return;
+		if (data.results.length <= 0) {
+			$('.taskWrapper').addClass('warnBox').html('<span class="iconfont">&#xf00b6;</span>没有任务!');
+			$('.pagination').empty();
+			return;
+		}
+
+		var output = Mustache.render(CDT.taskCancelTemp,data,$.extend(data,{
+			createTimeStr: function(){
+				return new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			statusStr : function() {
+				if (this.status == "FINISHED") {
+					return "已完成";
+				}
+				if (this.status == "CANCEL") {
+					return "已取消";
+				}
+				if (this.status == "PUBLISHED") {
+					return "已发布，待接手";
+				}
+				if (this.status == "WAIT_EXAMINE") {
+					return "待审核";
+				}
+				if (this.status == "WAIT_PAY") {
+					return "待支付";
+				}
+				if (this.status == "WAIT_SEND_GOODS") {
+					return "待发货";
+				}
+				if (this.status == "WAIT_WIDTHDRAW") {
+					return "待提现";
+				}
+				if (this.status == "WAIT_COMMENT") {
+					return "待好评";
+				}
+				if (this.status == "NOPASS") {
+					return "审核不通过";
+				}
+				if (this.status == "APPEAL") {
+					return "申诉中";
+				}
+			},publishTimeStr: function(){
+				return new Date(this.publishTime).Format('yyyy-MM-dd hh:mm:ss');
+			},paidFeeStr: function() {
+				return this.paidFee == null? '':$.number(this.paidFee/100,2);
+			},itemPriceStr: function() {
+				return this.itemPrice == null? '':$.number(this.itemPrice/100,2);
+			},postageStr: function(){
+				return this.postage == null? '':$.number(this.postage/100,2);
+			}
+		}));
+		$('#taskContainer').removeClass('warnBox').html(output);
+		$('.WAIT_EDIT,.WAITING_PAY').parents('.taskCell').addClass('newtaskCell');
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page: CDT.pageSize,
+			num_display_entries: 5,
+			current_page: pageNo,
+			num_edge_entries: 2,
+			callback: loadTaskCallBack,
+			callback_run: false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+function loadTaskCallBack(index, jq) {
+    loadTask(index + 1);
+}
+
+
+function initBase(){
+	//查询
+	$('#queryBtn').click(function(){
+		if(CDT.status=='WAIT_CONFIRM'){
+			loadTask(1);
+		}else{
+			loadSubTask(1);
+		}
+		
+	});
+
+	$(document).on('click','.boost',function(){
+		$('#boostWnd').show();
+	});
+
+	$("#examineAllBtn").click(function(){
+		if(!confirm("确定要全部审核通过吗？")){
+			return false;
+		}
+		Tr.post('/user/sdsubTask/passOrderExpress', {
+			'taskId':0
+		}, function(data) {
+			if (data.code != 200) {
+				alert(data.msg);
+				return;
+			}
+			alert("审核提交成功!");
+			loadTask(CDT.currPageNo);
+		});
+	});
+
+	$(document).on('click','.examinePassBtn',function(){
+		Tr.post('/user/sdsubTask/passOrderExpress', {
+			'taskId': $(this).attr("data-id")
+		}, function(data) {
+			if (data.code != 200) {
+				alert(data.msg);
+				return;
+			}
+			alert("审核成功!");
+			loadTask(CDT.currPageNo);
+		});
+	});
+	
+	$(document).on('click','.appealBtn',function(){
+		CDT.taskId=$(this).attr("data-id");
+		Tr.popup('appealWnd');
+
+	});
+	
+	$("#btnModifyAppeal").click(function(){
+		Tr.post('/seller/sdsubTask/appeal', {
+			'id':CDT.taskId,
+			'appealType':$("#appealType").val(),
+			'memo':$("#appeal_memo").val()
+		}, function(data) {
+			if (data.code != 200) {
+				alert(data.msg);
+				$("#appealWnd").hide();
+				return ;
+			}
+			
+			loadTask(CDT.currPageNo);
+			alert("申诉成功!");
+			$("#appealWnd").hide();
+		});
+	});
+	//增加工单弹出框
+   
+	$(document).on('click','.updateBtn',function(){
+		 var id = $(this).attr('data-id');
+		 Tr.get('/user/sdsubTask/findOrderExpress', {
+				'taskId': id
+			}, function(data) {
+				if (data.code != 200) {
+					return;
+				}
+				$("#sd_taskId").val(data.results.taskId);
+				$("#sd_name").val(data.results.shipper);
+				$("#sd_address").val(data.results.sellerAddress);
+				$("#sd_street").val(data.results.sellerStreet);
+				$("#sd_moblie").val(data.results.sellerMobile);
+				$("#re_name").val(data.results.consignee);
+				$("#re_state").val(data.results.state);
+				$("#re_city").val(data.results.city);
+				$("#re_region").val(data.results.region);
+				$("#re_street").val(data.results.address);
+				$("#re_mobile").val(data.results.mobile);
+				Tr.popup('modifyShopWnd');
+		});
+        
+	});
+	
+	//增加工单
+	$("#btnModifyComment").click(function(){
+		Tr.post('/user/sdsubTask/updateOrderExpress',{
+			'vo.address':$("#re_street").val(),
+			'vo.city':$("#re_city").val(),
+			'vo.consignee':$("#re_name").val(),
+			'vo.mobile':$("#re_mobile").val(),
+			'vo.taskId':$("#sd_taskId").val(),
+			'vo.region':$("#re_region").val(),
+			'vo.shipper':$("#sd_name").val(),
+			'vo.state':$("#re_state").val(),
+			'vo.sellerAddress':$("#sd_address").val(),
+			'vo.sellerMobile':$("#sd_moblie").val(),
+			'vo.sellerStreet':$("#sd_street").val()
+		},function(data){
+			if(data.code!=200){
+				alert(data.msg);
+				return;
+			}
+			alert('提交成功');
+			loadTask(CDT.currPageNo);
+			$("#modifyShopWnd").hide();
+		});
+	});
+	
+	  $('.inputDate').datePicker({
+			startDate: '2014-01-01',
+			endDate: '2020-01-01',
+			clickInput: true,
+			verticalOffset: 35
+		});
+	  
+	// 选择订单类型
+		$(document).on('click', '.fundTab', function() {
+			var $me = $(this);
+			$me.addClass('focus').siblings().removeClass('focus');
+			CDT.status = $me.attr('status');
+			if(CDT.status=="WAIT_CONFIRM"){
+				$("#examineAllBtn").show();
+				loadTask(1);
+			}else{
+				$("#examineAllBtn").hide();
+				loadSubTask(1);
+			}
+		});
+}
+
+$(function(){
+	CDT.taskCellTemp = $('#taskCellTemp').remove().val();
+	Mustache.parse(CDT.taskCellTemp);
+
+	CDT.taskCancelTemp = $('#taskCancelTemp').remove().val();
+	Mustache.parse(CDT.taskCancelTemp);
+	initBase();
+	loadTask(1);
+});

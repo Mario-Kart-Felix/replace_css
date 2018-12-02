@@ -1,0 +1,218 @@
+CDT = {
+	taskCellTemp : null,
+	currPageNo : 1,
+	pageSize : 20,
+	status : "FINISHED",
+	taskId : null
+};
+// 加载任务
+function loadTask(pageNo) {
+	var modifyTimeStart = ($.trim($('#modifyTimeStart').val())) ? $.trim($(
+			'#modifyTimeStart').val())
+			+ ' 00:00:00' : '', modifyTimeEnd = ($.trim($('#modifyTimeEnd')
+			.val())) ? $.trim($('#modifyTimeEnd').val()) + ' 00:00:00' : '';
+	var taskId = $("#taskId").val();
+	var expressNo = $("#expressNo").val();
+	var orderId = $("#orderId").val();
+	Tr.get('/user/sdsubTask/listSellerSendGoodsSdTask', {
+		'vo.shopId' : $("#shopName").val(),
+		'vo.taskId' : taskId,
+		'vo.orderId' : orderId,
+		'vo.status':CDT.status,
+		'vo.expressNo' : expressNo,
+		'vo.pageNo' : pageNo,
+		'vo.pageSize' : CDT.pageSize,
+		'vo.updateTimeStart' : modifyTimeStart,
+		'vo.updateTimeEnd' : modifyTimeEnd
+	}, function(data) {
+		if (data.code != 200) {
+			return;
+		}
+		var output = Mustache.render(CDT.taskCellTemp, $.extend(data, {
+			takeTimeStr : function() {
+				return this.takeTime == null ? '' : new Date(this.takeTime)
+						.Format('yyyy-MM-dd hh:mm');
+			},
+			paidFeeStr : function() {
+				return this.paidFee == null ? '' : $.number(this.paidFee / 100,
+						2);
+			},
+			itemPriceStr : function() {
+				return this.itemPrice == null ? '' : $.number(
+						this.itemPrice / 100, 2);
+			},
+			execptionStr : function() {
+				if(this.status=="EXCEPTION"){
+					return true;
+				}
+				return false;
+			},createTimeStr : function() {
+				return this.createTime == null ? '' : new Date(this.createTime)
+				.Format('yyyy-MM-dd hh:mm');
+			},updateTimeStr : function() {
+				return this.updateTime == null ? '' : new Date(this.updateTime)
+				.Format('yyyy-MM-dd hh:mm');
+			},expressTypeStr : function() {
+				if(this.expressType=='SELLERKD'){
+					return "商家快递";
+				}
+				if(this.expressType=='YDKD'){
+					return "韵达快递";
+				}
+				if(this.expressType=='YTKD'){
+					return "圆通快递";
+				}
+				if(this.expressType=='TTKD'){
+					return "天天快递";
+				}
+				if(this.expressType=='STKD'){
+					return "申通快递";
+				}
+				if(this.expressType=='ZTKD'){
+					return "中通快递";
+				}
+			},exportstr:function(){
+				if(this.status=="EXPORT"){
+					return true;
+				}
+				return false;
+			},noexportstr:function(){
+				if(this.status=="FINISHED"){
+					return true;
+				}
+				return false;
+			}
+		}));
+		var tid="";
+		if(taskId!=""){
+			tid=parseInt(taskId);
+		}
+		var url = "/seller/task/exportOrderExpress?vo.taskId="+tid+"&&vo.orderId=" + orderId + "&&vo.updateTimeStart="
+				+ modifyTimeStart + "&&vo.updateTimeEnd=" + modifyTimeEnd
+				+ "&&vo.expressNo=" + expressNo+"&&vo.shopId="+$("#shopName").val();
+		$("#expoptBtn").attr("href", url);
+		$('#taskContainer').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page : CDT.pageSize,
+			num_display_entries : 5,
+			current_page : pageNo,
+			num_edge_entries : 2,
+			callback : loadTaskCallBack,
+			callback_run : false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function loadTaskCallBack(index, jq) {
+	loadTask(index + 1);
+}
+
+function initBase() {
+	// 查询
+	$('#queryBtn').click(function() {
+		loadTask(1);
+	});
+
+	$('.inputDate').datePicker({
+		startDate : '2014-01-01',
+		endDate : '2020-01-01',
+		clickInput : true,
+		verticalOffset : 35
+	});
+	// 选择订单类型
+	$(document).on('click', '.fundTab', function() {
+		var $me = $(this);
+		$me.addClass('focus').siblings().removeClass('focus');
+		CDT.status = $me.attr('status');
+		loadTask(1);
+
+	});
+	
+	$(document).on('click','.updateBtn',function(){
+		 var id = $(this).attr('data-id');
+		 Tr.get('/user/sdsubTask/findOrderExpress', {
+				'taskId': id
+			}, function(data) {
+				if (data.code != 200) {
+					return;
+				}
+				$("#sd_taskId").val(data.results.taskId);
+				$("#sd_name").val(data.results.shipper);
+				$("#sd_address").val(data.results.sellerAddress);
+				$("#sd_street").val(data.results.sellerStreet);
+				$("#sd_moblie").val(data.results.sellerMobile);
+				$("#re_name").val(data.results.consignee);
+				$("#re_state").val(data.results.state);
+				$("#re_city").val(data.results.city);
+				$("#re_region").val(data.results.region);
+				$("#re_street").val(data.results.address);
+				$("#re_mobile").val(data.results.mobile);
+				Tr.popup('modifyShopWnd');
+		});
+       
+	});
+	
+	$(document).on('click','.noexportBtn',function(){
+		 var id = $(this).attr('data-id');
+		 Tr.post('/seller/sdtask/updateExpressStatus', {
+				'id': id,
+				'status':"EXPORT"
+			}, function(data) {
+				if (data.code != 200) {
+					return;
+				}
+				alert("处理成功");
+				loadTask(1);
+		});
+      
+	});
+	
+	$(document).on('click','.exportBtn',function(){
+		 var id = $(this).attr('data-id');
+		 Tr.post('/seller/sdtask/updateExpressStatus', {
+				'id': id,
+				'status':"FINISHED"
+			}, function(data) {
+				if (data.code != 200) {
+					return;
+				}
+				alert("处理成功");
+				loadTask(1);
+		});
+      
+	});
+	
+	//增加工单
+	$("#btnModifyComment").click(function(){
+		Tr.post('/user/sdsubTask/updateOrderExpress',{
+			'vo.address':$("#re_street").val(),
+			'vo.city':$("#re_city").val(),
+			'vo.consignee':$("#re_name").val(),
+			'vo.mobile':$("#re_mobile").val(),
+			'vo.taskId':$("#sd_taskId").val(),
+			'vo.region':$("#re_region").val(),
+			'vo.shipper':$("#sd_name").val(),
+			'vo.state':$("#re_state").val(),
+			'vo.sellerAddress':$("#sd_address").val(),
+			'vo.sellerMobile':$("#sd_moblie").val(),
+			'vo.sellerStreet':$("#sd_street").val()
+		},function(data){
+			if(data.code!=200){
+				alert(data.msg);
+				return;
+			}
+			alert('提交成功');
+			loadTask(CDT.currPageNo);
+			$("#modifyShopWnd").hide();
+		});
+	});
+}
+
+$(function() {
+	CDT.taskCellTemp = $('#taskCellTemp').remove().val();
+	Mustache.parse(CDT.taskCellTemp);
+
+	initBase();
+	loadTask(1);
+});

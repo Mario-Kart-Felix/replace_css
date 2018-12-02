@@ -1,0 +1,203 @@
+CDT = {
+	taskTemp : null,
+	currPageNo : 1,
+	pageSize : 5
+};
+// 加载任务
+function loadTask(pageNo) {
+	var modifyTimeStart = ($.trim($('#modifyTimeStart').val())) ? $.trim($(
+			'#modifyTimeStart').val())
+			+ ' 00:00:00' : '', modifyTimeEnd = ($.trim($('#modifyTimeEnd')
+			.val())) ? $.trim($('#modifyTimeEnd').val()) + ' 00:00:00' : '';
+	Tr.get('/seller/sdsub/listSellerSdSubTasksOld', {
+		'vo.status' : $('#status').val(),
+		'vo.shopId' : $.trim($('#shopName').val()),
+		'vo.sdTaskId' : $.trim($('#taskId').val()),
+		'vo.id' : $.trim($('#subId').val()),
+		'vo.buyerAccountNick' : $.trim($('#buyerAccountNick').val()),
+		'vo.orderId' : $.trim($('#orderId').val()),
+		'vo.expressNo' : $.trim($('#expressNos').val()),
+		'vo.pageNo' : pageNo,
+		'vo.pageSize' : CDT.pageSize,
+		'vo.updateTimeStart' : modifyTimeStart,
+		'vo.updateTimeEnd' : modifyTimeEnd
+	}, function(data) {
+		if (data.code != 200)
+			return;
+		if (data.results.length <= 0) {
+			$('.normTable').hide();
+			$('#noMsg').show();
+			$('.pagin-btm').hide();
+			return;
+		}
+		var output = Mustache.render(CDT.taskTemp, $.extend(data, {
+			ingotStr : function() {
+				return $.number((this.ingot+this.comssionProfit) / 100, 2);
+			},
+			paidFeeStr : function() {
+				return $.number(this.paidFee / 100, 2);
+			},
+			postageStr : function() {
+				return $.number(this.postage / 100, 2);
+			},
+			itemPriceStr : function() {
+				return $.number(this.itemPrice / 100, 2);
+			},
+			modifyTimeStr : function() {
+				if (this.modifyTime) {
+					return new Date(this.updateTime)
+							.Format('yyyy-MM-dd hh:mm:ss');
+				}
+				return '----';
+			},
+			takeTimeStr : function() {
+				if (this.takeTime == null) {
+					return "-----";
+				}
+				return new Date(this.takeTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			createTimeStr : function() {
+				if (this.createTime == null) {
+					return "-----";
+				}
+				return new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			statusStr : function() {
+				if (this.status == "FINISHED") {
+					return "已完成";
+				}
+				if (this.status == "CANCEL") {
+					return "已取消";
+				}
+				if (this.status == "PUBLISHED") {
+					return "已发布，待接手";
+				}
+				if (this.status == "WAIT_EXAMINE") {
+					return "待审核";
+				}
+				if (this.status == "WAIT_PAY") {
+					return "待支付";
+				}
+				if (this.status == "WAIT_SEND_GOODS") {
+					return "待发货";
+				}
+				if (this.status == "WAIT_WIDTHDRAW") {
+					return "待提现";
+				}
+				if (this.status == "WAIT_COMMENT") {
+					return "待好评";
+				}
+				if (this.status == "NOPASS") {
+					return "审核不通过";
+				}
+				if (this.status == "APPEAL") {
+					return "申诉中";
+				}
+				if (this.status == "FIRST_VISIT") {
+					return "待访问";
+				}
+				if (this.status == "SECOND_VISIT") {
+					return "待二次访问";
+				}
+				if (this.status == "THIRD_VISIT") {
+					return "待三次访问";
+				}
+				if (this.status == "FOURTH_VISIT") {
+					return "待四次访问";
+				}
+				if (this.status == "APPEAL") {
+					return "申诉中";
+				}
+			},extraStr : function() {
+				if(this.extraReward!=null){
+					return $.number((this.extraReward+this.extraRewardProfit) / 100, 2);
+				}
+				return 0;
+			},addServceIngotStr : function() {
+				if(this.addServceIngot!=null){
+					return $.number((this.addServceIngot) / 100, 2);
+				}
+				return 0;
+			},commentIngotStr:function(){
+				if(this.commentIngot!=null){
+					return $.number((this.commentIngot+this.commentProfit) / 100, 2);
+				}
+				return 0;
+			},refoundIngotStr:function(){
+				if(this.itemPrice!=null){
+					return getSysRefound((this.itemBuyNum*this.itemPrice) / 100);
+				}
+				return 0;
+			}
+		}));
+		$('.normTable').show();
+		$('#noMsg').hide();
+		$('.pagin-btm').show();
+		$('#taskContainer').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page : CDT.pageSize,
+			num_display_entries : 5,
+			current_page : pageNo,
+			num_edge_entries : 2,
+			callback : loadTaskCallBack,
+			callback_run : false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+function getSysRefound(price) {
+	return Math.ceil(price*2/1000)+1;
+}
+function loadTaskCallBack(index, jq) {
+	loadTask(index + 1);
+}
+
+function initBaseBind() {
+	$(document).on('click', '#queryBtn', function() {
+		loadTask(1);
+	});
+	
+	$('.inputDate').datePicker({
+		startDate : '2014-01-01',
+		endDate : '2020-01-01',
+		clickInput : true,
+		verticalOffset : 35
+	});
+
+	$("#exportBtn").click(function() {
+		var count = $("#count").val();
+		if(count==""||parseInt(count)<=0||count==null||isNaN(parseInt(count))){
+			return alert("请填写导出数量");
+		}
+		if(parseInt(count)>2000){
+			return alert("导出数量不能大于2000");
+		}
+		if(!confirm("是否确定导出账单？")){
+			return false;
+		}
+		var modifyTimeStart = ($.trim($('#modifyTimeStart').val())) ? $.trim($(
+		'#modifyTimeStart').val())
+		+ ' 00:00:00' : '', modifyTimeEnd = ($.trim($('#modifyTimeEnd')
+		.val())) ? $.trim($('#modifyTimeEnd').val()) + ' 00:00:00' : '';
+		var status= $('#status').val();
+		var shopName=$.trim($('#shopName').val());
+		var sdTaskId=$.trim($('#taskId').val());
+		var id=$.trim($('#subId').val());
+		var buyerNick=$.trim($('#buyerNick').val());
+		var buyerAccountNick=$.trim($('#buyerAccountNick').val());
+		var orderId=$.trim($('#orderId').val());
+		var expressNo=$.trim($('#expressNos').val());
+		var userNick = $("#userNick").val();
+		var params = "vo.status=" + status + "&vo.shopId="+shopName+"&vo.sdTaskId="+sdTaskId+"&vo.id="+id+"&vo.buyerNick="
+		+buyerNick+"&vo.buyerAccountNick="+buyerAccountNick+"&vo.orderId="+orderId+"&vo.expressNo="+expressNo+"&vo.userNick="+userNick+
+		"&vo.updateTimeStart="+modifyTimeStart+"&vo.updateTimeEnd="+modifyTimeEnd+"&vo.pageNo=1&vo.exportCount="+count;
+		location.href = "/seller/sdsub/exportSellerSdSubTasksOld?" + params;
+	});
+	
+}
+
+$(function() {
+	CDT.taskTemp = $('#taskTemp').remove().val();
+	initBaseBind();
+	loadTask(1);
+});

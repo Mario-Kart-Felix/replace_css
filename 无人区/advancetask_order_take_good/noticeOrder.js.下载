@@ -1,0 +1,168 @@
+CDT = {
+	taskTemp : null,
+	currPageNo : 1,
+	pageSize : 20
+};
+// 加载任务
+function loadTask(pageNo) {
+	
+	Tr.get('/seller/sdsub/listSellerNoticeSdSubTasks', {
+		'vo.status' : $('#status').val(),
+		'vo.shopName' : $.trim($('#shopName').val()),
+		'vo.sdTaskId' : $.trim($('#taskId').val()),
+		'vo.id' : $.trim($('#subId').val()),
+		'vo.buyerNick' : $.trim($('#buyerNick').val()),
+		'vo.buyerAccountNick' : $.trim($('#buyerAccountNick').val()),
+		'vo.orderId' : $.trim($('#orderId').val()),
+		'vo.expressNo' : $.trim($('#expressNos').val()),
+		'vo.pageNo' : pageNo,
+		'vo.pageSize' : CDT.pageSize
+	}, function(data) {
+		if (data.code != 200)
+			return;
+		if (data.results.length <= 0) {
+			$('.normTable').hide();
+			$('#noMsg').show();
+			$('.pagin-btm').hide();
+			return;
+		}
+		var output = Mustache.render(CDT.taskTemp, $.extend(data, {
+			
+			itemPriceStr : function() {
+				return $.number(this.itemPrice / 100, 2);
+			},
+			sendTimeStr : function() {
+				if (this.modifyTime) {
+					return new Date(this.sendGoodTime)
+							.Format('yyyy-MM-dd hh:mm:ss');
+				}
+				return '----';
+			},
+			takeTimeStr : function() {
+				if (this.takeTime == null) {
+					return "-----";
+				}
+				return new Date(this.takeTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			createTimeStr : function() {
+				if (this.createTime == null) {
+					return "-----";
+				}
+				return new Date(this.createTime).Format('yyyy-MM-dd hh:mm:ss');
+			},
+			statusStr : function() {
+				if (this.status == "FINISHED") {
+					return "已完成";
+				}
+				if (this.status == "CANCEL") {
+					return "已取消";
+				}
+				if (this.status == "PUBLISHED") {
+					return "已发布，待接手";
+				}
+				if (this.status == "WAIT_EXAMINE") {
+					return "待审核";
+				}
+				if (this.status == "WAIT_PAY") {
+					return "待支付";
+				}
+				if (this.status == "WAIT_SEND_GOODS") {
+					return "待发货";
+				}
+				if (this.status == "WAIT_WIDTHDRAW") {
+					return "待提现";
+				}
+				if (this.status == "WAIT_COMMENT") {
+					return "待好评";
+				}
+				if (this.status == "NOPASS") {
+					return "审核不通过";
+				}
+				if (this.status == "APPEAL") {
+					return "申诉中";
+				}
+				if (this.status == "FIRST_VISIT") {
+					return "待访问";
+				}
+				if (this.status == "SECOND_VISIT") {
+					return "待二次访问";
+				}
+				if (this.status == "THIRD_VISIT") {
+					return "待三次访问";
+				}
+				if (this.status == "FOURTH_VISIT") {
+					return "待四次访问";
+				}
+				if (this.status == "APPEAL") {
+					return "申诉中";
+				}
+			},xiaDanBtnShow:function(){
+				if (this.status == "WAIT_PAY"||this.status == "FIRST_VISIT") {
+					return true;
+				}
+				return false;
+			},shouHuoBtnShow:function(){
+				if (this.status == "WAIT_COMMENT") {
+					return true;
+				}
+				return false;
+			}
+		}));
+		$('.normTable').show();
+		$('#noMsg').hide();
+		$('.pagin-btm').show();
+		$('#taskContainer').html(output);
+		$('.pagination').pagination(data.totalCount, {
+			items_per_page : CDT.pageSize,
+			num_display_entries : 5,
+			current_page : pageNo,
+			num_edge_entries : 2,
+			callback : loadTaskCallBack,
+			callback_run : false
+		});
+		CDT.currPageNo = pageNo;
+	});
+}
+
+function loadTaskCallBack(index, jq) {
+	loadTask(index + 1);
+}
+
+function initBaseBind() {
+	$(document).on('click', '#queryBtn', function() {
+		loadTask(1);
+	});
+	// 撤销未接单任务
+	$(document).on('click', '.xiaDanBtnShow', function() {
+		if(!confirm("确定要催该买手下单吗？")){
+			return false;
+		}
+		CDT.currId = $(this).attr('data-id');
+		Tr.post('/seller/sdsubTask/noticeOrder', {
+			taskId: CDT.currId
+		}, function(data) {
+			if (data.code != 200) return alert(data.msg);
+			alert("催单成功");
+		});
+	});
+	
+	$(document).on('click', '.shouHuoBtnShow', function() {
+		if(!confirm("请检查发货时间是否可以收货，确定要催该买手收货吗？")){
+			return false;
+		}
+		CDT.currId = $(this).attr('data-id');
+		Tr.post('/seller/sdsubTask/noticeTakeGoods', {
+			taskId: CDT.currId
+		}, function(data) {
+			if (data.code != 200) return alert(data.msg);
+			alert("催单成功");
+		});
+	});
+	
+}
+
+$(function() {
+	CDT.taskTemp = $('#taskTemp').remove().val();
+	initBaseBind();
+	loadTask(1);
+});

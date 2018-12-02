@@ -91,7 +91,7 @@
 	border: 2px solid red !important;
 }
 .required{
-	background-color: #fef6e7;
+	background-color: #FDF5E7;
 }
 .requiredStar{
 	color: red;
@@ -99,13 +99,13 @@
 }
 /*---------------------UI组件----------------------------------*/
 
-.stdColorButton { display: inline-block; padding:5px 15px; color:#FFF; background-color:#f46c00;  border-radius: 2px;}
+.stdColorButton { display: inline-block; padding:0px 17px; color:#FFF;line-height: 34px;font-size: 16px; background-color:#F36B00;  border-radius: 2px;}
 .stdColorButton:hover { background-color:#f46c00; color: white; }
 
 /*.stdColorButton { display: inline-block; padding:5px 15px; color:#FFF; background-color:#4D92CB;  border-radius: 2px;}
 .stdColorButton:hover { background-color:#3987C6;  }*/
 .stdColorButton .iconfont { position: relative; left:-4px; }
-.inputText,.inputMultiText{ border:solid 1px #ABADB3; padding:3px; line-height: 16px; -webkit-border-radius:2px;border-radius:2px;-webkit-box-shadow:inset 0 1px 2px rgba(0,0,0,.075);box-shadow:inset 0 1px 2px rgba(0,0,0,.075);-webkit-transition:all .15s ease-in;-moz-transition:all .15s ease-in;-o-transition:all .15s ease-in;transition:all .15s ease-in;-webkit-transition-property:border-color,-webkit-box-shadow;-moz-transition-property:border-color,box-shadow;-o-transition-property:border-color,box-shadow;transition-property:border-color,box-shadow;}
+.inputText,.inputMultiText{ border:none; padding:3px; line-height: 16px; -webkit-border-radius:2px;border-radius:2px;-webkit-box-shadow:inset 0 1px 2px rgba(0,0,0,.075);box-shadow:inset 0 1px 2px rgba(0,0,0,.075);-webkit-transition:all .15s ease-in;-moz-transition:all .15s ease-in;-o-transition:all .15s ease-in;transition:all .15s ease-in;-webkit-transition-property:border-color,-webkit-box-shadow;-moz-transition-property:border-color,box-shadow;-o-transition-property:border-color,box-shadow;transition-property:border-color,box-shadow;}
 .inputText{height:16px;}
 .inputBtn{ -webkit-appearance: button;line-height: 17px; font-size: 14px; height: 27px; padding:0 0.5em; overflow:visible;vertical-align: middle;}
 .datePicker{ background:url("/public/images/calen-icon-bg.png") no-repeat 95% center; width: 170px; height: 20px; padding: 5px; border:solid 1px #ABADB3; line-height: 20px; display: block; cursor: pointer; position: relative; }

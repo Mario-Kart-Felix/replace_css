@@ -31,6 +31,7 @@ body{
 	overflow: hidden;
 	position: relative;
 	padding: 10px 25px;
+	padding-top:20px;
 	background-color: #fafafa;
 }
 .formBlockInner{
@@ -61,7 +62,7 @@ body{
 	transition-property: border-color,box-shadow;
 }
 .jumpLink{
-	color:#4083A9;
+	color:#F36B00;
 }
 
 

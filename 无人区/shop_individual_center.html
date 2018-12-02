@@ -13,7 +13,8 @@
 <link rel="stylesheet" type="text/css" href="./shop_individual_center/buyers.css" media="all">
 <link rel="stylesheet" type="text/css" href="./shop_individual_center/base.css" media="all">
 <link rel="stylesheet" media="screen" href="./shop_individual_center/common.css">
-
+<!-- <link rel="stylesheet" type="text/css" href="./public/stylesheets/frame.css" media="all"> -->
+<!-- <link rel="stylesheet" type="text/css" href="./public/stylesheets/aa.css" media="all"> -->
 <link rel="stylesheet" media="screen" href="./shop_individual_center/user-center.css">
 
 <script src="./shop_individual_center/hm.js.下载"></script><script src="./shop_individual_center/jquery.min.js.下载" type="text/javascript"></script>
@@ -41,7 +42,7 @@ var _hmt = _hmt || [];
 	display: block;
 	width: 300px;
 	height: 100px;
-	background: url("http://digg-public.qiniudn.com/FoSyi9FyMwcBvrgUjmrzOPKSsJ4y") no-repeat 0 0;
+	background: url(./index/logo.png) no-repeat 0 0;
 	text-indent: -9999px;
 	overflow: hidden;
 }
@@ -55,7 +56,24 @@ var _hmt = _hmt || [];
 	overflow: hidden;
 	z-index: 9999;
 }
-
+.nav_wz{
+    width: 100%;
+	text-align: center;
+	background: #fff;
+	padding:36px;
+}
+.nav_wz p{
+	font-size:24px;
+}
+.nav_wz p span{
+	color:#F47620;
+}
+.nav_wz p:last-child{
+	font-size:36px;
+}
+.nav_wz p:last-child span{
+	color:#57D78D;
+}
 .suspend dl {
 	width: 120px;
 	height: 198px;
@@ -107,7 +125,9 @@ var _hmt = _hmt || [];
 		-40px 30px;
 	overflow: hidden;
 }
-
+.origin{
+	color:#F58539;
+}
 * html .suspend {
 	position: absolute;
 	left: expression(eval(document.documentElement.scrollRight));
@@ -133,10 +153,10 @@ var _hmt = _hmt || [];
 					<a href="shop_notice.html" class="v-nav">通知（<span class="fc_red">0</span>）
 					</a> <em class="line"></em> <a href="shop_help_center.html" class="v-nav">帮助中心</a>
 					<em class="line"></em> <span class="v-nav v-open-qiao">  <span class="xufei"> <a href="financecenter_member_add_recharge.html" class="v-nav">[续费]</a>  
-					</span> <a href="shop_individual_center.html" class="v-nav"> 会员到期时间：<span class="red bold num time">2018-11-17</span>
-					</a> <em class="line"></em>  <a href="shop_individual_center.html" class="v-nav"> <span>金币</span>
-						<span class="bold red" id="selleringot">597.90</span>
-					</a> <em class="line"></em> <a href="shop_individual_center.html" class="v-nav"> <span class="red" id="nick">13682211037</span> <span class="vip_growth_tips level0"></span>
+					</span> <a href="shop_individual_center.html" class="v-nav"> 会员到期时间：<span class="origin bold num time">2018-11-17</span>
+					</a> <em class="line"></em>  <a href="shop_individual_center.html" class="v-nav"> <span class="origin">金币</span>
+						<span class="bold origin" id="selleringot">597.90</span>
+					</a> <em class="line"></em> <a href="shop_individual_center.html" class="v-nav"> <span class="origin" id="nick">13682211037</span> <span class="vip_growth_tips level0"></span>
 					</a> <em class="line"></em>   <a href="index.html" class="v-nav">首页</a>
 				</span></div>
 			</div>
@@ -200,8 +220,13 @@ var _hmt = _hmt || [];
 
 		
 		<div class="wd1200">
-			<div class="mt10">
-				<div class="mr11 floatLeft shadow mb10" id="ad_top_all"><a data-id="2" class="adUrlClick" target="_blank" href="http://51wrq.com/notice/112"><img src="./shop_individual_center/FvTAzRL6U178gyUvcu6U77w2brKX"></a></div>
+			<div class="mt10" style="padding-top:20px;">
+				<div class="mr11 floatLeft  nav_wz" id="ad_top_all" style="margin-bottom:20px">
+					<p>原来部分<span>银行卡已更换</span>，请以充值页面为准，充错了<span>不再审核</span></p>
+					<p>人工审核重置时间为<span>每周一</span>至<span>周六9:00-17:30</span>,请提前安排资金</p>
+					<!-- <a data-id="2" class="adUrlClick" target="_blank" href="http://51wrq.com/notice/112">
+						<img src="./shop_individual_center/FvTAzRL6U178gyUvcu6U77w2brKX"></a> -->
+				</div>
 			</div>
 		</div>
 		

@@ -37,11 +37,15 @@ var _hmt = _hmt || [];
 <link rel="shortcut icon" href="http://51wrq.com/favicon.ico">
 
 <style type="text/css">
+#invite::-webkit-input-placeholder{
+	color:#ccc;
+	font-size: 12px;
+}
 .logo a {
 	display: block;
 	width: 300px;
 	height: 100px;
-	background: url("http://digg-public.qiniudn.com/FoSyi9FyMwcBvrgUjmrzOPKSsJ4y") no-repeat 0 0;
+	background: url(./index/logo.png) no-repeat 0 0;
 	text-indent: -9999px;
 	overflow: hidden;
 }
@@ -137,7 +141,7 @@ var _hmt = _hmt || [];
 		</div>
 		<div class="c_header_vip">
 			<div class="wd1200">
-				<span class="v-nav">欢迎来到“无人区”推广服务平台！</span>
+				<span class="v-nav">欢迎来到“人气猫”推广服务平台！</span>
 				<div class="f_r">
 					<div class="menu">
 						<ul>
@@ -184,7 +188,7 @@ var _hmt = _hmt || [];
 
 <div id="centerBox">
 	<div class="formBlock">
-		<div class="contentTitle">
+		<div class="contentTitle" style="border:none">
 			注册
 		</div>
 		<div class="contentBody" id="formSection">
@@ -202,28 +206,46 @@ var _hmt = _hmt || [];
 					</div>
 					-->
 					<div class="panelLine sec">
-						<span class="ls floatLeft lbl">注册手机号码</span>
+						<span class="ls floatLeft lbl">用户名<span style="vertical-align:middle;color:#F36B00">*</span></span>
+						<input type="text" class="inputText floatLeft ls long required" id="username" name="user.username" aria-required="true">
+					</div>
+					<div class="panelLine sec">
+						<span class="ls floatLeft lbl">密码<span style="vertical-align:middle;color:#F36B00">*</span></span>
 						<input type="text" class="inputText floatLeft ls long required" id="mobile" name="user.mobile" aria-required="true">
 					</div>
 					<div class="panelLine sec">
-						<span class="ls floatLeft lbl">短信验证码</span> 
+						<span class="ls floatLeft lbl">确认密码<span style="vertical-align:middle;color:#F36B00">*</span></span>
+						<input type="text" class="inputText floatLeft ls long required" id="mobile" name="user.mobile" aria-required="true">
+					</div>
+					<div class="panelLine sec">
+						<span class="ls floatLeft lbl">QQ<span style="vertical-align:middle;color:#F36B00">*</span></span>
+						<input type="text" class="inputText floatLeft ls long required" id="qq" name="user.qq" aria-required="true">
+					</div>
+					<div class="panelLine sec">
+						<span class="ls floatLeft lbl">手机<span style="vertical-align:middle;color:#F36B00">*</span></span>
+						<input type="text" class="inputText floatLeft ls long required" id="mobile" name="user.mobile" aria-required="true">
+					</div>
+					<div class="panelLine sec">
+						<span class="ls floatLeft lbl">短信验证码<span style="vertical-align:middle;color:#F36B00">*</span></span> 
 						<input type="text" class="inputText floatLeft ls long required" id="smsValidCode" name="smsValidCode" aria-required="true">
-						<input type="button" class="captcha" id="btncaptcha" value="获取短信验证码">
+						<input type="button" class="captcha" style="border:none;color:#656565;background: #F2F2F2;padding:7px;font-size: 13px;" id="btncaptcha" value="获取短信验证码">
 					</div>
 					<div class="panelLine sec">
-						<span class="ls floatLeft lbl">密码</span>
-						<input type="text" class="inputText floatLeft ls long required" id="mobile" name="user.mobile" aria-required="true">
-					</div>
-					<div class="panelLine sec">
-						<span class="ls floatLeft lbl">确认密码</span>
-						<input type="text" class="inputText floatLeft ls long required" id="mobile" name="user.mobile" aria-required="true">
+						<span class="ls floatLeft lbl">邀请码</span>
+						<input type="text" class="inputText floatLeft ls long required" id="invite"
+						placeholder="可以不填写"
+						name="user.invite" aria-required="true">
 					</div>
 				</form>
-				<div class="buttonSection clearfix" style="margin-top: 20px;padding-left:84px;">
-					<a href="javascript:;" class="stdColorButton" id="btnBeginToVerify">
+				<div class="buttonSection clearfix" style="margin-top: 20px;padding-left:0;">
+					<a href="javascript:;" class="stdColorButton" id="btnBeginToVerify" style="padding:0 40px">
 						注册
-						<span class="iconfont">󰅭</span>
+						<!-- <span class="iconfont">󰅭</span> -->
 					</a>
+					<div style="display:inline-block;margin-left:10px
+					"><input type="checkbox" checked style="vertical-align: middle;">
+					<span style="vertical-align: middle;">我已看过并同意</span><span style="color:#F36B00;vertical-align: middle;">《人气猫服务协议》</span></div>
+					
 				</div>
 				
 			</div>
@@ -234,8 +256,8 @@ var _hmt = _hmt || [];
 		<!--底部 开始-->
 		<div class="c_footer">
 			<p>
-				Copyright © 2018 wrq.com 版权所有 <a href="http://www.miibeian.gov.cn/" target="_blank">浙ICP备123456789号-2</a>
-
+				<!-- Copyright © 2018 wrq.com 版权所有 <a href="http://www.miibeian.gov.cn/" target="_blank">浙ICP备123456789号-2</a> -->
+				版权所有 粤ICP备18073409号  
 			</p>
 			<!--统计 开始-->
 			<p style="display: none;"></p>

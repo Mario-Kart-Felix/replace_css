@@ -100,10 +100,10 @@ hr{ height: 0; margin:10px 0; border:none; border-top:dashed 1px #DEDEDE;}
 	height: 50px;
 	line-height: 50px;
 	border-bottom: solid 1px #d1d1d1;
-	color:#393939;
+	color:#555;
 	padding:0 20px;
 	font-family: "Microsoft Yahei";
-	font-size: 20px;
+	font-size: 16px;
 	position: relative;
 	text-shadow: 1px 1px 1px rgba(0,0,0,.2);
 }

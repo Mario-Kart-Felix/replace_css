@@ -74,7 +74,7 @@ body{background:#e7e8eb;}
 .menu_item{line-height:33px;}
 .menu_item a{display:block;padding:0 0 0 58px;width:auto;color:#222;}
 .menu_item a:hover{text-decoration:none;background:#f4f5f9;}
-.menu_item.selected{background:#57b382;color:#fff;}
+.menu_item.selected{background:#57D78D;color:#fff;}
 .menu_item.selected a{color:#fff;}
 .menu_item.selected a:hover{background:#57b382;}
 

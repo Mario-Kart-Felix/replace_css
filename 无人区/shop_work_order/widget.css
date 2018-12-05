@@ -61,9 +61,12 @@
 	background-color: #FAFAFA;
 }
 .warnBox{
-	border: solid 1px #dad08b;
-	color: #938434;
-	background-color: #fbf6d9;
+	/* border: solid 1px #dad08b; */
+	color: #656565;
+	background-color: #FBF5D9;
+	margin:25px;
+	padding:10px;
+
 }
 .infoBox{
 	border: solid 1px #8fccea;

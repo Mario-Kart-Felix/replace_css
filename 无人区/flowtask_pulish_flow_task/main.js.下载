@@ -165,7 +165,7 @@ $.validator.setDefaults({
 });
 
 Tr.error = $.validator.format('<span style="color:red"><span class="iconfont">&#xf0155;</span>&nbsp;{0}</span>');
-Tr.errorLeft = $.validator.format('<span class="" style="color:red"><span class="iconfont">&#xf0155;</span>&nbsp;{0}</span>');
+Tr.errorLeft = $.validator.format('<span class="" style="color:red"><span class="iconfont icon-web-icon-"></span>&nbsp;{0}</span>');
 
 /* 修改校验框架默认提示信息 */
 $.extend($.validator.messages, {

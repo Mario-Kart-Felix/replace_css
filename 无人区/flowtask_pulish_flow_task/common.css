@@ -168,14 +168,14 @@ textarea{vertical-align:top;}
 .sui-steps .round{display: inline-block; width: 16px; height: 16px; -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px; text-align: center; line-height: 16px;}
 .sui-steps .round .sui-icon{vertical-align: -1px;}
 .sui-steps .round + span:before{content: '\00a0';}
-.sui-steps .finished{background-color: #28a3ef; color: #ffffff;}
-.sui-steps .finished .triangle-right{border-color: transparent transparent transparent #28a3ef;}
-.sui-steps .finished .round{background-color: #ffffff; background-color: transparent\9; color: #28a3ef;}
+.sui-steps .finished{background-color: #F58539; color: #ffffff;}
+.sui-steps .finished .triangle-right{border-color: transparent transparent transparent #F58539;}
+.sui-steps .finished .round{background-color: #ffffff; background-color: transparent\9; color: #F58539;}
 .sui-steps .finished .round > i{color: #28a3ef; font-size: 12px;}
-.sui-steps .current{background-color: #4cb9fc; color: #ffffff;}
-.sui-steps .current .triangle-right{border-color: transparent transparent transparent #4cb9fc;}
-.sui-steps .current .round{background-color: #ffffff; color: #4cb9fc; color: #FFF\9; background-color: transparent\9;}
-.sui-steps .todo{background-color: #eeeeee; color: #999999;}
+.sui-steps .current{background-color: #F58539; color: #ffffff;}
+.sui-steps .current .triangle-right{border-color: transparent transparent transparent #F58539;}
+.sui-steps .current .round{background-color: #ffffff; color: #F58539; color: #FFF\9; background-color: transparent\9;}
+.sui-steps .todo{background-color: #eeeeee; color: #656565;}
 .sui-steps .todo .triangle-right{border-color: transparent transparent transparent #eeeeee;}
 .sui-steps .todo .round{background-color: #ffffff; background-color: transparent\9;}
 .steps-large .wrap > div{font-size: 14px; width: 243.75px; height: 40px; line-height: 40px;}

@@ -172,8 +172,8 @@ textarea{vertical-align:top;}
 .sui-steps .finished .triangle-right{border-color: transparent transparent transparent #F58539;}
 .sui-steps .finished .round{background-color: #ffffff; background-color: transparent\9; color: #F58539;}
 .sui-steps .finished .round > i{color: #28a3ef; font-size: 12px;}
-.sui-steps .current{background-color: #F58539; color: #ffffff;}
-.sui-steps .current .triangle-right{border-color: transparent transparent transparent #F58539;}
+.sui-steps .current{background-color: #F69553; color: #ffffff;}
+.sui-steps .current .triangle-right{border-color: transparent transparent transparent #F69553;}
 .sui-steps .current .round{background-color: #ffffff; color: #F58539; color: #FFF\9; background-color: transparent\9;}
 .sui-steps .todo{background-color: #eeeeee; color: #656565;}
 .sui-steps .todo .triangle-right{border-color: transparent transparent transparent #eeeeee;}

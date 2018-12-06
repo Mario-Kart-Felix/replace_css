@@ -95,7 +95,7 @@ Tr.validateName = function(name) {
 	return true;
 };
 
-Tr.ok = '<span class="iconfont" style="color:green">&#xf0156;</span>';
+Tr.ok = '<span class="iconfont icon-zhengque1" style="font-size:17px;color:green"></span>';
 Tr.okLeft = '<span class="iconfont floatLeft" style="color:green">&#xf0156;</span>';
 Tr.err = '<span class="iconfont" style="color:red">&#xf0155;</span>';
 Tr.errLeft = '<span class="iconfont floatLeft" style="color:red">&#xf0155;</span>';

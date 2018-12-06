@@ -95,11 +95,11 @@ Tr.validateName = function(name) {
 	return true;
 };
 
-Tr.ok = '<span class="iconfont" style="color:green">&#xf0156;</span>';
-Tr.okLeft = '<span class="iconfont floatLeft" style="color:green">&#xf0156;</span>';
-Tr.err = '<span class="iconfont" style="color:red">&#xf0155;</span>';
-Tr.errLeft = '<span class="iconfont floatLeft" style="color:red">&#xf0155;</span>';
-Tr.errRequired = '<span class="iconfont floatLeft" style="color:red">&#xf0155;&nbsp;必填</span>';
+Tr.ok = '<span class="iconfont icon-zhengque1" style="color:green">&#xf0156;</span>';
+Tr.okLeft = '<span class="iconfont icon-web-icon-" style="color:red"></span>';
+Tr.err = '<span class="iconfont icon-web-icon-" style="color:red"></span>';
+Tr.errLeft = '<span class="iconfont icon-web-icon-" style="color:red">&#xf0155;</span>';
+Tr.errRequired = '<span class="iconfont icon-web-icon-" style="color:red">&#xf0155;&nbsp;必填</span>';
 
 Tr.regs = {
 	nick: /^[\u4e00-\u9fa5a-zA-Z0-9]{4,15}$/,
@@ -164,8 +164,8 @@ $.validator.setDefaults({
 	}
 });
 
-Tr.error = $.validator.format('<span style="color:red"><span class="iconfont">&#xf0155;</span>&nbsp;{0}</span>');
-Tr.errorLeft = $.validator.format('<span class="" style="color:red"><span class="iconfont">&#xf0155;</span>&nbsp;{0}</span>');
+Tr.error = $.validator.format('<span style="color:red"><span class="iconfont icon-web-icon-"></span>&nbsp;{0}</span>');
+Tr.errorLeft = $.validator.format('<span class="" style="color:red"><span class="iconfont">12</span>&nbsp;{0}</span>');
 
 /* 修改校验框架默认提示信息 */
 $.extend($.validator.messages, {

@@ -16,7 +16,9 @@
 .normTable thead td{
 	background: #DEDEDE;
 	border-bottom: solid 1px #BBB;
-	color: #999;
+	color: #656565;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 .item-box .pic{
 	width:80px;

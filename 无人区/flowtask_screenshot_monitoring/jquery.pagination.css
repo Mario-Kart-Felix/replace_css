@@ -19,9 +19,9 @@
 }
 .pagination a{
 	cursor: pointer;
-	background-color: #ACB6BE;
+	background-color: #57D78D;
 	color: #FFF;
-	font-weight: 700;	
+	/* font-weight: 700;	 */
 	padding: 3px 10px;
 }
 .pagination a:hover{

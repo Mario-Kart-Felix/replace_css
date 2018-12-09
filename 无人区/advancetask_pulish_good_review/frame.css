@@ -148,10 +148,10 @@ hr{ height: 0; margin:10px 0; border:none; border-top:dashed 1px #DEDEDE;}
 }
 .tabSwitchWrapper .focus,.tab-cell:hover{
 	background-color:#FFF;
-	border-top-color:#FA7456;
+	border-top-color:#F58539;
 	border-left-color:#DADADA;
 	border-right-color:#DADADA;
-	color:#FA7456;
+	color:#F58539;
 	position: relative;
 	top: 0px;
 }

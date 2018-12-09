@@ -62,8 +62,8 @@
 }
 .warnBox{
 	border: solid 1px #dad08b;
-	color: #938434;
-	background-color: #fbf6d9;
+	color: #656565;
+	background-color: #FBF5D9;
 }
 .infoBox{
 	border: solid 1px #8fccea;
@@ -99,8 +99,8 @@
 }
 /*---------------------UI组件----------------------------------*/
 
-.stdColorButton { display: inline-block; padding:5px 15px; color:#FFF; background-color:#f46c00;  border-radius: 2px;}
-.stdColorButton:hover { background-color:#f46c00; color: white; }
+.stdColorButton { display: inline-block; padding:5px 15px; color:#FFF; background-color:#57D78D;  border-radius: 2px;}
+.stdColorButton:hover { background-color:#57D78D; color: white; }
 
 /*.stdColorButton { display: inline-block; padding:5px 15px; color:#FFF; background-color:#4D92CB;  border-radius: 2px;}
 .stdColorButton:hover { background-color:#3987C6;  }*/
@@ -119,7 +119,7 @@
 .topTile,.secondTile,.thirdTile { font-style: normal; font-weight: normal; position: relative; }
 .topTile { color: #3E3E3E; font-weight: 700; font-size: 30px; line-height: 30px; height: 45px; font-family: "Microsoft Yahei"; margin-bottom: 20px; }
 .secondTile,.intro { font-family: "Microsoft Yahei"; }
-.secondTile{ font-size: 16px; color: #0A8095; margin-bottom: 15px; line-height: 30px; }
+.secondTile{ font-size: 16px; color: #F58539; margin-bottom: 15px; line-height: 30px; }
 .thirdTile{ margin-bottom: 5px; }
 dd{ display: block; }
 .intro { line-height: 20px; color:#555; background-color:#F7F7F7; border-style: solid; border-color:#DEDEDE; border-width: 1px 0; padding: 10px 30px; margin-bottom: 30px; position: relative; left:-30px; width: 938px; }

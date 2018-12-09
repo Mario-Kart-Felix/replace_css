@@ -62,8 +62,8 @@
 }
 .warnBox{
 	border: solid 1px #dad08b;
-	color: #938434;
-	background-color: #fbf6d9;
+	color: #656565;
+	background-color: #FBF5D9;
 }
 .infoBox{
 	border: solid 1px #8fccea;
@@ -99,7 +99,7 @@
 }
 /*---------------------UI组件----------------------------------*/
 
-.stdColorButton { display: inline-block; padding:5px 15px; color:#FFF; background-color:#f46c00;  border-radius: 2px;}
+.stdColorButton { display: inline-block; padding:5px 15px; color:#FFF; background-color:#57D78D;  border-radius: 2px;}
 .stdColorButton:hover { background-color:#f46c00; color: white; }
 
 /*.stdColorButton { display: inline-block; padding:5px 15px; color:#FFF; background-color:#4D92CB;  border-radius: 2px;}

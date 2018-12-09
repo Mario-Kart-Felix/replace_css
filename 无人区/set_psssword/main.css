@@ -1,0 +1,29 @@
+body,button,input,select,textarea {
+		font:14px/1.5 "Microsoft Yahei", tahoma,arial,"Hiragino Sans GB",\5b8b\4f53;
+	}
+	
+	
+	.mr11{
+	margin-right: 15px;
+	}
+	.mb10{
+	margin-bottom: 10px;
+	}
+	.shadow{
+	    box-shadow: 0 15px 30px rgba(0, 0, 0, .3);
+	}
+
+	.c-hot-li{
+		position: relative; 
+	}
+	.c-hot-gif{
+		position: absolute; right: 2px; top: -9px;
+	}
+	.c-hot-imgQQ{
+		width: 200px; height: 200px;position: absolute; display: none;
+		z-index: 110; left: -157px; top: 32px;
+	}
+	
+	.c-hot-imgQQ img{
+		width: 250px;
+	}

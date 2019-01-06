@@ -522,8 +522,12 @@ margin-left:10px;
 							<div class="panelLine mt10">
 							<span class="secondTile floatLeft mr20">上传二维码</span>
 							<input type="text" placeholder="" id="erweimaUrl" name="erweimaUrl" value="" class="form-control w50 required inputText" style="width: 450px;" aria-required="true">
-								<input type="button" id="btnUploadtgImg" value="上传二维码图" style="position: relative; z-index: 1;"> <span class="text-color-999 aw-upload-tips hidden-xs"> 允许 :
+							<div style="position:relative;display:inline-block">
+							<input type="button" id="btnUploadtgImg" value="上传二维码图" style="position: relative; z-index: 1;"> <span class="text-color-999 aw-upload-tips hidden-xs"> 允许 :
 									jpg,png,gif </span>
+							<input type="file" multiple="multiple" id="file" accept="image/png,image/gif,image/jpeg" name='file' style="position: absolute;left: 0;top: 6px;width: 124px;opacity: 0;z-index: 10"/>
+							</div>
+								
 							</div>
 							<div id="imgBoxtgImg">
 								<img id="ewmtgImg" style="margin-left:100px;" width="100px" height="100px" name="tgImg" src="http://51wrq.com/publish/app/task">
